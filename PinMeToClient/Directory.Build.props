@@ -1,0 +1,13 @@
+<Project>
+    <PropertyGroup Label="Globals">
+        <LangVersion>latest</LangVersion>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <Authors>Henrik Ljungdahl</Authors>
+        <Company>The Code Patch</Company>
+        <Product>PinMeTo Client</Product>
+    </PropertyGroup>
+</Project>

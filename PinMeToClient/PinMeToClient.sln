@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PinMeToClient", "PinMeToClient\PinMeToClient.csproj", "{D05E8F39-1EDA-481A-BEB5-CB184DAA679B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution files", "Solution files", "{B58C68A9-4827-43E0-9CB2-B65E3C40A975}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		Directory.Build.props = Directory.Build.props
+		..\.gitignore = ..\.gitignore
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PinMeToClient.UnitTests", "PinMeToClient.UnitTests\PinMeToClient.UnitTests.csproj", "{514FFA17-46F5-4DA4-9E76-3F4A151D225F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{D05E8F39-1EDA-481A-BEB5-CB184DAA679B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D05E8F39-1EDA-481A-BEB5-CB184DAA679B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D05E8F39-1EDA-481A-BEB5-CB184DAA679B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D05E8F39-1EDA-481A-BEB5-CB184DAA679B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{514FFA17-46F5-4DA4-9E76-3F4A151D225F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{514FFA17-46F5-4DA4-9E76-3F4A151D225F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{514FFA17-46F5-4DA4-9E76-3F4A151D225F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{514FFA17-46F5-4DA4-9E76-3F4A151D225F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
