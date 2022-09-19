@@ -1,0 +1,6 @@
+﻿{
+    "PinMeToClient": {
+        "AppId": "insert app id here",
+        "AppSecret": "insert app secret here"
+    }
+}
