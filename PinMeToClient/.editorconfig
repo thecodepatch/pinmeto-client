@@ -3,34 +3,6 @@ root = true
 ###############################
 # Core EditorConfig Options   #
 ###############################
-# All files
-[*]
-dotnet_diagnostic.CA1032.severity = silent
-dotnet_diagnostic.CA1303.severity = silent
-dotnet_diagnostic.CA1307.severity = silent
-dotnet_diagnostic.CA2007.severity = silent
-dotnet_diagnostic.CA1031.severity = silent
-dotnet_diagnostic.CA1040.severity = silent
-dotnet_diagnostic.CA1707.severity = silent
-dotnet_diagnostic.CA2227.severity = silent
-dotnet_diagnostic.CA2229.severity = silent
-dotnet_diagnostic.CA1056.severity = silent
-dotnet_diagnostic.CA1000.severity = silent
-dotnet_diagnostic.CA1062.severity = silent
-dotnet_diagnostic.CA2225.severity = silent
-dotnet_diagnostic.CA1710.severity = silent
-dotnet_diagnostic.CA1716.severity = silent
-dotnet_diagnostic.CA1812.severity = silent
-dotnet_diagnostic.CA1305.severity = silent
-dotnet_diagnostic.CA1724.severity = silent
-dotnet_diagnostic.CA1052.severity = silent
-dotnet_diagnostic.CA1054.severity = silent
-dotnet_diagnostic.CA1055.severity = silent
-dotnet_diagnostic.CA2234.severity = silent
-dotnet_diagnostic.CA1303.severity = silent
-dotnet_diagnostic.CA2229.severity = silent
-dotnet_diagnostic.asyncfixer01.severity = silent
-
 # XML files
 [*.{xml,config}]
 indent_style = tab
@@ -40,7 +12,6 @@ indent_size = 1
 indent_style = space
 indent_size = 4
 insert_final_newline = true
-charset = utf-8-bom
 ###############################
 # .NET Coding Conventions     #
 ###############################
@@ -70,8 +41,6 @@ dotnet_style_explicit_tuple_names = true:suggestion
 dotnet_style_null_propagation = true:suggestion
 dotnet_style_coalesce_expression = true:suggestion
 dotnet_style_prefer_is_null_check_over_reference_equality_method = true:silent
-dotnet_prefer_inferred_tuple_names = true:suggestion
-dotnet_prefer_inferred_anonymous_type_member_names = true:suggestion
 dotnet_style_prefer_auto_properties = true:silent
 dotnet_style_prefer_conditional_expression_over_assignment = true:silent
 dotnet_style_prefer_conditional_expression_over_return = true:silent
@@ -126,8 +95,6 @@ csharp_style_deconstructed_variable_declaration = true:suggestion
 csharp_prefer_simple_default_expression = true:suggestion
 csharp_style_pattern_local_over_anonymous_function = true:suggestion
 csharp_style_inlined_variable_declaration = true:suggestion
-# Namespace preferences
-csharp_style_namespace_declarations = file_scoped:warning
 ###############################
 # C# Formatting Rules         #
 ###############################
