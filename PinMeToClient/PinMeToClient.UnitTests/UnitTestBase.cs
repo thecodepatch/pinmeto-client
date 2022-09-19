@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Reflection;
-using Divergic.Logging.Xunit;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -18,20 +17,11 @@ public abstract class UnitTestBase
     {
         var conf = GetConfiguration();
 
-        var loggingConfig = new LoggingConfig();
-        conf.GetSection("Logging").Bind(loggingConfig);
-
         var serviceCollection = new ServiceCollection()
             // Bootstrap the PinMeTwo client library.
             .AddPinMeToClient(conf.GetSection("PinMeToClient"))
             // Redirect ILogger logging to the XUnit output.
-            .AddLogging(
-                l =>
-                {
-                    l.AddXunit(testOutputHelper);
-                    l.SetMinimumLevel(LogLevel.Debug);
-                }
-            );
+            .AddLogging(l => l.SetMinimumLevel(LogLevel.Debug).AddXunit(testOutputHelper));
 
         // Enable custom service configuration in the test classes.
         ConfigureServices(serviceCollection);
