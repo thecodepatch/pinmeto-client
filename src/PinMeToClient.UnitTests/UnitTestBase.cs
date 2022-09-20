@@ -9,8 +9,24 @@ using Xunit.Abstractions;
 
 namespace TheCodePatch.PinMeToClient.UnitTests;
 
-public abstract class UnitTestBase
+/// <summary>
+/// Base class for unit tests. Sets up common functionality
+/// including logging and configuration management as well
+/// as a service provider with the PinMeTo client already
+/// bootstrapped.
+/// </summary>
+public abstract class UnitTestBase : IAsyncLifetime
 {
+    public async Task DisposeAsync()
+    {
+        await ((ServiceProvider)ServiceProvider).DisposeAsync();
+    }
+
+    public Task InitializeAsync()
+    {
+        return Task.CompletedTask;
+    }
+
     protected IServiceProvider ServiceProvider { get; }
 
     protected UnitTestBase(ITestOutputHelper testOutputHelper)
@@ -41,7 +57,7 @@ public abstract class UnitTestBase
         return Path.GetDirectoryName(codeBasePath);
     }
 
-    private IConfiguration GetConfiguration()
+    private static IConfiguration GetConfiguration()
     {
         return new ConfigurationBuilder()
             .SetBasePath(GetBinPath())
