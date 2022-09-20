@@ -1,11 +1,10 @@
-﻿using System.Net.Http.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using TheCodePatch.PinMeToClient.Exceptions;
+using TheCodePatch.PinMeToClient.Response;
 
 namespace TheCodePatch.PinMeToClient.AccessToken;
 
@@ -14,16 +13,19 @@ internal class AccessTokenSource : IAccessTokenSource
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<AccessTokenSource> _logger;
     private readonly IOptionsMonitor<PinMeToClientOptions> _options;
+    private readonly IResponseHandler _responseHandler;
     private AccessToken? _currentToken;
 
     public AccessTokenSource(
         IHttpClientFactory httpClientFactory,
         IOptionsMonitor<PinMeToClientOptions> options,
+        IResponseHandler responseHandler,
         ILogger<AccessTokenSource> logger
     )
     {
         _httpClientFactory = httpClientFactory;
         _options = options;
+        _responseHandler = responseHandler;
         _logger = logger;
     }
 
@@ -57,20 +59,9 @@ internal class AccessTokenSource : IAccessTokenSource
         return client;
     }
 
-    private async Task<Exception> CreateException(HttpResponseMessage response)
-    {
-        var content = await response.Content.ReadFromJsonAsync<ErrorModel>();
-        _logger.LogError("An error was retrieved from the API: {Error}", content);
-        return new PinMeToException(content?.Description ?? "Unexpected error");
-    }
-
     private async Task RefreshToken()
     {
         var deserialized = await RetrieveTokenFromApi();
-        if (deserialized == null)
-        {
-            throw new ResponseFormatException("The response could not be deserialized.");
-        }
 
         _logger.LogDebug(
             "New access token will be used for {ValidityDuration} seconds",
@@ -84,7 +75,7 @@ internal class AccessTokenSource : IAccessTokenSource
         };
     }
 
-    private async Task<ResponseModel?> RetrieveTokenFromApi()
+    private async Task<ResponseModel> RetrieveTokenFromApi()
     {
         var message = new Dictionary<string, string>
         {
@@ -94,14 +85,7 @@ internal class AccessTokenSource : IAccessTokenSource
         };
         var client = CreateAndSetupClient();
         var response = await client.PostAsync("/oauth/token", new FormUrlEncodedContent(message));
-
-        if (response.IsSuccessStatusCode)
-        {
-            _logger.LogDebug("An OK response was retrieved from the API");
-            return await response.Content.ReadFromJsonAsync<ResponseModel>();
-        }
-
-        throw await CreateException(response);
+        return await _responseHandler.DeserializeOrThrow<ResponseModel>(response);
     }
 
     [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Local")]
@@ -110,13 +94,10 @@ internal class AccessTokenSource : IAccessTokenSource
     [SuppressMessage("ReSharper", "ClassNeverInstantiated.Local")]
     private record ResponseModel
     {
-        [JsonPropertyName("expires_in")]
-        public int ExpiresInSeconds { get; init; }
+        [JsonPropertyName("expires_in")] public int ExpiresInSeconds { get; init; }
 
-        [JsonPropertyName("token_type")]
-        public string TokenType { get; init; } = null!;
+        [JsonPropertyName("token_type")] public string TokenType { get; init; } = null!;
 
-        [JsonPropertyName("access_token")]
-        public string Value { get; init; } = null!;
+        [JsonPropertyName("access_token")] public string Value { get; init; } = null!;
     }
 }

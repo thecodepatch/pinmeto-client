@@ -3,17 +3,17 @@
 namespace TheCodePatch.PinMeToClient.AccessToken;
 
 /// <summary>
-/// An existing access token.
+///     An existing access token.
 /// </summary>
 internal record AccessToken
 {
     /// <summary>
-    /// The date and time of the expiry of this access token.
+    ///     The date and time of the expiry of this access token.
     /// </summary>
     public DateTime Expires { get; init; }
 
     /// <summary>
-    /// Gets the amount of seconds that remains of the validity of this access token.
+    ///     Gets the amount of seconds that remains of the validity of this access token.
     /// </summary>
     /// <returns></returns>
     public double GetRemainingValiditySeconds()
@@ -22,7 +22,7 @@ internal record AccessToken
     }
 
     /// <summary>
-    /// The access token value.
+    ///     The access token value.
     /// </summary>
     public string Value { get; init; } = null!;
 }

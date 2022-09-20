@@ -1,8 +1,9 @@
 ﻿namespace TheCodePatch.PinMeToClient.Exceptions;
 
-public class PinMeToException:Exception
+/// <summary>
+/// A general exception.
+/// </summary>
+public class PinMeToException : Exception
 {
-    public PinMeToException(string message):base(message)
-    {
-    }
+    public PinMeToException(string message) : base(message) { }
 }

@@ -17,23 +17,23 @@ public class AccessTokenSourceTests : UnitTestBase
     }
 
     [Fact]
-    public async Task TokenIsRetrievedWithExpectedValues()
-    {
-        var t = await _accessTokenSource.GetAccessToken();
-        t.ShouldNotBeNullOrWhiteSpace();
-    }
-
-    [Fact]
     public async Task ConsecutiveTokenRetrievalsAreFast()
     {
         await _accessTokenSource.GetAccessToken();
 
         var s = Stopwatch.StartNew();
-        for (int i = 0; i < 10; i++)
+        for (var i = 0; i < 10; i++)
         {
             await _accessTokenSource.GetAccessToken();
         }
 
         s.ElapsedMilliseconds.ShouldBeLessThan(5);
+    }
+
+    [Fact]
+    public async Task TokenIsRetrievedWithExpectedValues()
+    {
+        var t = await _accessTokenSource.GetAccessToken();
+        t.ShouldNotBeNullOrWhiteSpace();
     }
 }
