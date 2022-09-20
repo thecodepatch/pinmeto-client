@@ -23,4 +23,21 @@ internal static class Guard
             );
         }
     }
+
+    /// <summary>
+    /// Checks that a parameter is not null or whitespace.
+    /// </summary>
+    /// <param name="parameterName">The parameter name.</param>
+    /// <param name="parameterValue">The parameter value.</param>
+    /// <exception cref="InvalidInputException">Thrown if the parameter value is null or whitespace.</exception>
+    public static void IsNotNullOrWhiteSpace(string parameterName, string? parameterValue)
+    {
+        if (string.IsNullOrWhiteSpace(parameterValue))
+        {
+            throw new InvalidInputException(
+                parameterName,
+                $"{parameterName} must not be null or whitespace"
+            );
+        }
+    }
 }

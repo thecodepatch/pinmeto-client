@@ -37,7 +37,12 @@ public abstract class UnitTestBase : IAsyncLifetime
             // Bootstrap the PinMeTwo client library.
             .AddPinMeToClient(conf.GetSection("PinMeToClient"))
             // Redirect ILogger logging to the XUnit output.
-            .AddLogging(l => l.SetMinimumLevel(LogLevel.Debug).AddXunit(testOutputHelper));
+            .AddLogging(l => l.SetMinimumLevel(LogLevel.Debug).AddXunit(testOutputHelper))
+            // Get options for unit tests from configuration files.
+            .AddOptions<UnitTestsOptions>()
+            .Bind(conf.GetRequiredSection("UnitTestOptions"))
+            .ValidateDataAnnotations()
+            .Services;
 
         // Enable custom service configuration in the test classes.
         ConfigureServices(serviceCollection);

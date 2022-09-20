@@ -1,6 +1,11 @@
 ﻿{
-    "PinMeToClient": {
-        "AppId": "insert app id here",
-        "AppSecret": "insert app secret here"
-    }
+  "PinMeToClient": {
+    "AppId": "insert app id",
+    "AppSecret": "insert app secret",
+    "AccountId": "insert account id"
+  },
+
+  "UnitTestOptions": {
+    "AnExistingStoreId": "insert a store ID that exists in your data"
+  }
 }

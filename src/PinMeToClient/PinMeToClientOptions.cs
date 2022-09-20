@@ -28,4 +28,10 @@ public record PinMeToClientOptions
     /// </summary>
     [Required]
     public string AppSecret { get; set; } = null!;
+
+    /// <summary>
+    /// The account ID.
+    /// </summary>
+    [Required]
+    public string AccountId { get; set; } = null!;
 }

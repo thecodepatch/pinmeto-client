@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Shouldly;
 using TheCodePatch.PinMeToClient.Exceptions;
 using TheCodePatch.PinMeToClient.Locations;
@@ -9,10 +11,14 @@ namespace TheCodePatch.PinMeToClient.UnitTests.Locations;
 public class LocationsTests : UnitTestBase
 {
     private readonly ILocationsClient _locationsClient;
+    private readonly UnitTestsOptions _options;
 
     public LocationsTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
         _locationsClient = ServiceProvider.GetRequiredService<ILocationsClient>();
+        _options = ServiceProvider
+            .GetRequiredService<IOptionsMonitor<UnitTestsOptions>>()
+            .CurrentValue;
     }
 
     [Fact]
@@ -92,5 +98,21 @@ public class LocationsTests : UnitTestBase
     public async Task ThrowsWhenPageSizeIsOutOfBounds()
     {
         await Assert.ThrowsAsync<InvalidInputException>(() => _locationsClient.List(new(251)));
+    }
+
+    [Fact]
+    public async Task CanGetDetails()
+    {
+        var details = await _locationsClient.Get(_options.AnExistingStoreId);
+        details.ShouldNotBeNull().StoreId.ShouldNotBeNullOrWhiteSpace();
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("    ")]
+    public async Task ThrowsWhenInvalidStoreId(string? storeId)
+    {
+        await Assert.ThrowsAsync<InvalidInputException>(() => _locationsClient.Get(storeId!));
     }
 }
