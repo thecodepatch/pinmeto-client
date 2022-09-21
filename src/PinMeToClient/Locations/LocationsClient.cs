@@ -1,8 +1,13 @@
 ﻿using System.Collections.Specialized;
+using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
 using TheCodePatch.PinMeToClient.AccessToken;
 using TheCodePatch.PinMeToClient.Exceptions;
+using TheCodePatch.PinMeToClient.Locations.Model;
 using TheCodePatch.PinMeToClient.Response;
+using TheCodePatch.PinMeToClient.Serialization;
 
 namespace TheCodePatch.PinMeToClient.Locations;
 
@@ -11,17 +16,20 @@ internal class LocationsClient : ILocationsClient
     private readonly IAccessTokenSource _accessTokenSource;
     private readonly HttpClient _client;
     private readonly IOptionsMonitor<PinMeToClientOptions> _options;
+    private readonly ISerializer _serializer;
     private readonly IResponseHandler _responseHandler;
 
     public LocationsClient(
         HttpClient client,
         IOptionsMonitor<PinMeToClientOptions> options,
+        ISerializer serializer,
         IAccessTokenSource accessTokenSource,
         IResponseHandler responseHandler
     )
     {
         _client = client;
         _options = options;
+        _serializer = serializer;
         _accessTokenSource = accessTokenSource;
         _responseHandler = responseHandler;
         _client.BaseAddress = options.CurrentValue.ApiBaseAddress;
@@ -39,25 +47,49 @@ internal class LocationsClient : ILocationsClient
         return result.Data;
     }
 
-    public async Task<PagedResult<Location>> List(PageNavigation changePage)
+    public async Task<LocationDetails> Create(CreateLocationInput input)
     {
-        Guard.IsWithinRange(nameof(changePage.PageSize), changePage.PageSize, 0, 250);
+        var url = await GetUrl(null);
+        var content = _serializer.MakeJson(input);
+        var response = await _client.PostAsync(url, content);
+        var result = await _responseHandler.DeserializeOrThrow<AtomicResponse<LocationDetails>>(
+            response
+        );
+        return result.Data;
+    }
+
+    public async Task<LocationDetails> CreateOrUpdate(CreateLocationInput input)
+    {
+        var parameters = new NameValueCollection { { "upsert", "true" } };
+        var url = await GetUrl(null, parameters);
+        var content = _serializer.MakeJson(input);
+
+        var response = await _client.PostAsync(url, content);
+        var result = await _responseHandler.DeserializeOrThrow<AtomicResponse<LocationDetails>>(
+            response
+        );
+        return result.Data;
+    }
+
+    public async Task<PagedResult<Location>> List(PageNavigation pageNavigation)
+    {
+        Guard.IsWithinRange(nameof(pageNavigation.PageSize), pageNavigation.PageSize, 0, 250);
 
         var urlParameters = new NameValueCollection
         {
-            { "pagesize", changePage.PageSize.ToString() }
+            { "pagesize", pageNavigation.PageSize.ToString() },
         };
 
-        if (null != changePage.Key)
+        if (null != pageNavigation.Key)
         {
-            var direction = changePage.Direction switch
+            var direction = pageNavigation.Direction switch
             {
                 PageNavigationDirection.Next => "next",
                 PageNavigationDirection.Previous => "before",
                 _ => throw new ArgumentOutOfRangeException(),
             };
 
-            urlParameters.Add(direction, changePage.Key);
+            urlParameters.Add(direction, pageNavigation.Key);
         }
 
         var url = await GetUrl(null, urlParameters);
@@ -68,6 +100,17 @@ internal class LocationsClient : ILocationsClient
         );
 
         return new PagedResult<Location>(locations);
+    }
+
+    public async Task<LocationDetails> UpdateLocation(string storeId, UpdateLocationInput input)
+    {
+        var url = await GetUrl($"/{storeId}/");
+        var content = _serializer.MakeJson(input);
+        var response = await _client.PutAsync(url, content);
+        var result = await _responseHandler.DeserializeOrThrow<AtomicResponse<LocationDetails>>(
+            response
+        );
+        return result.Data;
     }
 
     private async Task<string> GetUrl(string? path, NameValueCollection? queryParameters = null)

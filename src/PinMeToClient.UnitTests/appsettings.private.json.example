@@ -6,6 +6,7 @@
   },
 
   "UnitTestOptions": {
-    "AnExistingStoreId": "insert a store ID that exists in your data"
+    "IsGoogleCustomNameEnabled": true,
+    "IsFacebookCustomNameEnabled": true
   }
 }

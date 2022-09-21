@@ -7,6 +7,9 @@ using Xunit.Abstractions;
 
 // ReSharper disable VirtualMemberCallInConstructor
 
+// Turn off all parallelization because the tests interfere with each other if it is activated.
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
+
 namespace TheCodePatch.PinMeToClient.UnitTests;
 
 /// <summary>

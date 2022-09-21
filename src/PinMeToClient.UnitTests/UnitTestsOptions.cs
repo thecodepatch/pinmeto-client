@@ -5,5 +5,8 @@ namespace TheCodePatch.PinMeToClient.UnitTests;
 public record UnitTestsOptions
 {
     [Required]
-    public string AnExistingStoreId { get; init; } = null!;
+    public bool IsFacebookCustomNameEnabled { get; init; }
+
+    [Required]
+    public bool IsGoogleCustomNameEnabled { get; init; }
 }

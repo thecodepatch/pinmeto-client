@@ -1,9 +1,12 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http.Logging;
 using TheCodePatch.PinMeToClient.AccessToken;
+using TheCodePatch.PinMeToClient.Communication;
 using TheCodePatch.PinMeToClient.Locations;
 using TheCodePatch.PinMeToClient.Response;
+using TheCodePatch.PinMeToClient.Serialization;
 
 namespace TheCodePatch.PinMeToClient;
 
@@ -53,9 +56,17 @@ public static class Bootstrapping
     private static IServiceCollection AddPinMeToClientInternal(this IServiceCollection services)
     {
         return services
+            .AddSingleton<ISerializer, Serializer>()
             .AddSingleton<IAccessTokenSource, AccessTokenSource>()
             .AddSingleton<IResponseHandler, ResponseHandler>()
+            .AddSingleton<LoggingHttpClientHandler>()
             .AddHttpClient<ILocationsClient, LocationsClient>()
+            .ConfigureHttpMessageHandlerBuilder(
+                b =>
+                    b.AdditionalHandlers.Add(
+                        b.Services.GetRequiredService<LoggingHttpClientHandler>()
+                    )
+            )
             .Services;
     }
 }
