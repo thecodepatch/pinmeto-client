@@ -21,6 +21,14 @@ public class GetLocationTests : UnitTestBase
             .CurrentValue;
     }
 
+    [Fact]
+    public async Task DetailsAreRetrievedForLocationWithMinimalData()
+    {
+        await _locationsClient.CreateOrUpdate(Constants.MinimalLocation);
+        var details = await _locationsClient.Get(Constants.MinimalLocation.StoreId);
+        var d = details.ShouldNotBeNull();
+    }
+
     // TODO The Name seems to fall back to the client's name. Is that expected?
     [Fact]
     public async Task AllDetailsAreRetrieved()

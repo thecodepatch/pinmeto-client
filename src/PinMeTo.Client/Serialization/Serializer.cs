@@ -14,8 +14,10 @@ internal class Serializer : ISerializer
             Converters =
             {
                 new JsonStringEnumConverter(),
-                new JsonDateOnlyConverter(),
-                new JsonTimeOnlyConverter(),
+                new JsonDateOnlyConverter.Nullable(),
+                new JsonDateOnlyConverter.NonNullable(),
+                new JsonTimeOnlyConverter.Nullable(),
+                new JsonTimeOnlyConverter.NonNullable(),
             },
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         };

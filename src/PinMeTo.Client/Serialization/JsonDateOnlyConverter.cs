@@ -5,23 +5,64 @@ using System.Text.Json.Serialization;
 
 namespace TheCodePatch.PinMeTo.Client.Serialization;
 
-internal class JsonDateOnlyConverter : JsonConverter<DateOnly>
+internal class JsonDateOnlyConverter
 {
-    public override DateOnly Read(
-        ref Utf8JsonReader reader,
-        Type typeToConvert,
-        JsonSerializerOptions options
-    )
+    private static DateOnly Parse(string s)
     {
-        return DateOnly.ParseExact(reader.GetString()!, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+        return DateOnly.ParseExact(s, "yyyy-MM-dd", CultureInfo.InvariantCulture);
     }
 
-    public override void Write(
-        Utf8JsonWriter writer,
-        DateOnly dateOnlyValue,
-        JsonSerializerOptions options
-    )
+    private static string Serialize(DateOnly d)
     {
-        writer.WriteStringValue(dateOnlyValue.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture));
+        return d.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+    }
+
+    public class NonNullable : JsonConverter<DateOnly>
+    {
+        public override bool HandleNull => true;
+
+        public override DateOnly Read(
+            ref Utf8JsonReader reader,
+            Type typeToConvert,
+            JsonSerializerOptions options
+        )
+        {
+            var val = reader.GetString();
+            return Parse(val!);
+        }
+
+        public override void Write(
+            Utf8JsonWriter writer,
+            DateOnly dateOnlyValue,
+            JsonSerializerOptions options
+        )
+        {
+            writer.WriteStringValue(Serialize(dateOnlyValue));
+        }
+    }
+
+    public class Nullable : JsonConverter<DateOnly?>
+    {
+        public override bool HandleNull => true;
+
+        public override DateOnly? Read(
+            ref Utf8JsonReader reader,
+            Type typeToConvert,
+            JsonSerializerOptions options
+        )
+        {
+            var val = reader.GetString();
+            return string.IsNullOrWhiteSpace(val) ? null : Parse(val);
+        }
+
+        public override void Write(
+            Utf8JsonWriter writer,
+            DateOnly? dateOnlyValue,
+            JsonSerializerOptions options
+        )
+        {
+            var val = dateOnlyValue.HasValue ? Serialize(dateOnlyValue.Value) : null;
+            writer.WriteStringValue(val);
+        }
     }
 }

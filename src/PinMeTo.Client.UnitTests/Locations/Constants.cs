@@ -5,9 +5,23 @@ namespace TheCodePatch.PinMeTo.Client.UnitTests.Locations;
 
 internal static class Constants
 {
+    public static readonly CreateLocationInput MinimalLocation =
+        new()
+        {
+            StoreId = "UNIT-TEST-STORE-NOT-REAL-MINIMAL",
+            Address =
+            {
+                City = "Some city",
+                Country = "Sweden",
+                Street = "Some street",
+                Zip = "Some zip",
+            },
+        };
+
     public static readonly CreateLocationInput CompleteLocation =
         new()
         {
+            StoreId = "UNIT-TEST-STORE-NOT-REAL",
             Address =
             {
                 City = "Some city",
@@ -39,7 +53,6 @@ internal static class Constants
                 Saturday = CreateDay(6),
                 Sunday = CreateDay(7),
             },
-            StoreId = "UNIT-TEST-STORE-NOT-REAL",
             WifiSsid = "some wifi ssid",
             IsAlwaysOpen = false,
             IsPermanentlyClosed = false,

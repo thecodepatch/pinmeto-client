@@ -19,4 +19,10 @@ public class CreateLocationTests : UnitTestBase
     {
         await _locationsClient.CreateOrUpdate(Constants.CompleteLocation);
     }
+
+    [Fact]
+    public async Task CanCreateMinimalLocation()
+    {
+        await _locationsClient.CreateOrUpdate(Constants.MinimalLocation);
+    }
 }
