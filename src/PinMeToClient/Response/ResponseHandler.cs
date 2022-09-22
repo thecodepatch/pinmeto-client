@@ -45,6 +45,6 @@ internal class ResponseHandler : IResponseHandler
         var responseContent = await response.Content.ReadAsStringAsync();
         _logger.LogError("An error was retrieved from the API: {Error}", responseContent);
         var errorModel = _serializer.Deserialize<ErrorResponse>(responseContent);
-        return new PinMeToException(errorModel?.Description ?? "Unexpected error");
+        return new PinMeToException(errorModel.Description);
     }
 }
