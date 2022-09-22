@@ -124,10 +124,10 @@ public class ListLocationsTests : UnitTestBase
                         .NoneShouldBeNullOrWhiteSpace(a => a.Country)
             )
             .NoneShouldBeNull(
-                x => x.SpecialOpenHours,
+                x => x.SpecialOpeningHours,
                 allowEmptyEnumerables: true,
-                specialOpenHour =>
-                    specialOpenHour
+                specialOpeningHours =>
+                    specialOpeningHours
                         .NoneShouldEqual(soh => soh.CloseTime, default)
                         .NoneShouldEqual(soh => soh.OpenTime, default)
                         .NoneShouldEqual(soh => soh.Start, default)
@@ -150,7 +150,7 @@ public class ListLocationsTests : UnitTestBase
                         .SomeShouldNotBeNullOrWhiteSpace(d => d!.Long)
             )
             .NoneShouldBeNull(
-                x => x.OpenHours,
+                x => x.OpeningHours,
                 openHours =>
                     openHours
                         .NoneShouldBeNull(o => o!.Monday, TestDay)
@@ -196,7 +196,7 @@ public class ListLocationsTests : UnitTestBase
             )
             .ShouldHaveNoErrors();
 
-        void TestDay(PropertyTester<OpenHours.OpenHoursDay> dayToTest)
+        void TestDay(PropertyTester<WeekOpeningHours.DayOpeningHours> dayToTest)
         {
             dayToTest
             // We are not testing State because there are no invalid values.

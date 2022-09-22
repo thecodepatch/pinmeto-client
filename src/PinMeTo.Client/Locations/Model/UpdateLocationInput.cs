@@ -7,7 +7,7 @@ namespace TheCodePatch.PinMeTo.Client.Locations.Model;
 /// <summary>
 /// Properties to update in a location. Only root properties that have a value will be updated.
 /// There are no required properties for updating a location. However, if you want to update a
-/// field like 'Address.Street' or 'OpenHours.Thu' you have to include all fields in that property,
+/// field like 'Address.Street' or 'OpeningHours.Thu' you have to include all fields in that property,
 /// not just the field you want to update.
 /// </summary>
 public record UpdateLocationInput
@@ -37,10 +37,10 @@ public record UpdateLocationInput
     public Position? Position { get; set; }
 
     [JsonPropertyName("openHours")]
-    public OpenHours? OpenHours { get; set; }
+    public WeekOpeningHours? OpeningHours { get; set; }
 
     [JsonPropertyName("specialOpenHours")]
-    public List<SpecialOpenHour>? SpecialOpenHours { get; set; }
+    public List<SpecialOpeningHour>? SpecialOpeningHours { get; set; }
 
     [JsonPropertyName("googleName")]
     public string? GoogleName { get; set; }

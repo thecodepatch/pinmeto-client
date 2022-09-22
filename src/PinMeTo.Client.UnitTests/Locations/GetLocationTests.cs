@@ -26,7 +26,7 @@ public class GetLocationTests : UnitTestBase
     {
         await _locationsClient.CreateOrUpdate(Constants.MinimalLocation);
         var details = await _locationsClient.Get(Constants.MinimalLocation.StoreId);
-        var d = details.ShouldNotBeNull();
+        details.ShouldNotBeNull();
     }
 
     // TODO The Name seems to fall back to the client's name. Is that expected?
@@ -44,12 +44,12 @@ public class GetLocationTests : UnitTestBase
 
         d.StoreId.ShouldBe(expected.StoreId);
         d.Address.ShouldBeEquivalentTo(expected.Address);
-        d.SpecialOpenHours.ShouldBeEquivalentTo(expected.SpecialOpenHours);
+        d.SpecialOpeningHours.ShouldBeEquivalentTo(expected.SpecialOpeningHours);
         d.Contact.ShouldBeEquivalentTo(expected.Contact);
         d.Description.ShouldBeEquivalentTo(expected.Description);
         d.LocationDescriptor.ShouldBe(expected.LocationDescriptor);
         d.Position.ShouldBeEquivalentTo(expected.Position);
-        d.OpenHours.ShouldBeEquivalentTo(expected.OpenHours);
+        d.OpeningHours.ShouldBeEquivalentTo(expected.OpeningHours);
         d.IsPermanentlyClosed.ShouldBe(expected.IsPermanentlyClosed ?? false);
         d.IsTemporarilyClosedUntil.ShouldBe(expected.IsTemporarilyClosedUntil);
         d.IsAlwaysOpen.ShouldBe(expected.IsAlwaysOpen ?? false);

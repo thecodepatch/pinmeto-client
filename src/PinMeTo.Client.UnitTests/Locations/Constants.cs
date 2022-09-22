@@ -43,7 +43,7 @@ internal static class Constants
             FacebookName = "fbname",
             GoogleName = "some google name",
             LocationDescriptor = "some location descriptor",
-            OpenHours = new()
+            OpeningHours = new()
             {
                 Monday = CreateDay(1),
                 Tuesday = CreateDay(2),
@@ -56,7 +56,7 @@ internal static class Constants
             WifiSsid = "some wifi ssid",
             IsAlwaysOpen = false,
             IsPermanentlyClosed = false,
-            SpecialOpenHours = new()
+            SpecialOpeningHours = new()
             {
                 new()
                 {
@@ -71,11 +71,11 @@ internal static class Constants
             IsTemporarilyClosedUntil = DateOnly.FromDateTime(DateTime.Today.AddDays(10)),
         };
 
-    private static OpenHours.OpenHoursDay CreateDay(int openingTime)
+    private static WeekOpeningHours.DayOpeningHours CreateDay(int openingTime)
     {
         return new()
         {
-            State = OpenHours.OpenHoursDay.OpenState.Open,
+            State = WeekOpeningHours.DayOpeningHours.OpenState.Open,
             Times =
             {
                 new()

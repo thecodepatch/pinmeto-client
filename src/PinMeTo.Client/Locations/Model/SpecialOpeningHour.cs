@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace TheCodePatch.PinMeTo.Client.Locations.Model;
 
-public record SpecialOpenHour
+public record SpecialOpeningHour
 {
     [JsonPropertyName("closeTime")] // TODO or endTime?
     [Required]

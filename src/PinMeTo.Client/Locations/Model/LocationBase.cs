@@ -15,7 +15,7 @@ public abstract record LocationBase
     public Address Address { get; init; } = new();
 
     [JsonPropertyName("specialOpenHours")]
-    public List<SpecialOpenHour>? SpecialOpenHours { get; init; }
+    public List<SpecialOpeningHour>? SpecialOpeningHours { get; init; }
 
     [JsonPropertyName("contact")]
     [Required]
@@ -32,7 +32,7 @@ public abstract record LocationBase
     public string? LocationDescriptor { get; init; }
 
     [JsonPropertyName("openHours")]
-    public OpenHours? OpenHours { get; set; }
+    public WeekOpeningHours? OpeningHours { get; set; }
 
     [JsonPropertyName("location")]
     [Required]

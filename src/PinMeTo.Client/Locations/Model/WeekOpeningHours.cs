@@ -4,41 +4,41 @@ using System.Text.Json.Serialization;
 
 namespace TheCodePatch.PinMeTo.Client.Locations.Model;
 
-public record OpenHours
+public record WeekOpeningHours
 {
     [JsonPropertyName("mon")]
     [Required]
-    public OpenHoursDay Monday { get; init; } = new();
+    public DayOpeningHours Monday { get; init; } = new();
 
     [JsonPropertyName("tue")]
     [Required]
-    public OpenHoursDay Tuesday { get; init; } = new();
+    public DayOpeningHours Tuesday { get; init; } = new();
 
     [JsonPropertyName("wed")]
     [Required]
-    public OpenHoursDay Wednesday { get; init; } = new();
+    public DayOpeningHours Wednesday { get; init; } = new();
 
     [JsonPropertyName("thu")]
     [Required]
-    public OpenHoursDay Thursday { get; init; } = new();
+    public DayOpeningHours Thursday { get; init; } = new();
 
     [JsonPropertyName("fri")]
     [Required]
-    public OpenHoursDay Friday { get; init; } = new();
+    public DayOpeningHours Friday { get; init; } = new();
 
     [JsonPropertyName("sat")]
     [Required]
-    public OpenHoursDay Saturday { get; init; } = new();
+    public DayOpeningHours Saturday { get; init; } = new();
 
     [JsonPropertyName("sun")]
     [Required]
-    public OpenHoursDay Sunday { get; init; } = new();
+    public DayOpeningHours Sunday { get; init; } = new();
 
-    public record OpenHoursDay
+    public record DayOpeningHours
     {
         [JsonPropertyName("span")]
         [Required]
-        public List<OpenHoursTimeSpan> Times { get; set; } = new();
+        public List<OpeningHours> Times { get; set; } = new();
 
         [JsonPropertyName("state")]
         [Required]
@@ -52,7 +52,7 @@ public record OpenHours
             AlwaysOpen,
         }
 
-        public record OpenHoursTimeSpan
+        public record OpeningHours
         {
             [JsonPropertyName("close")]
             [Required]

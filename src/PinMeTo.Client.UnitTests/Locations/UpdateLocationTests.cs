@@ -120,33 +120,33 @@ public class UpdateLocationTests : UnitTestBase
     }
 
     [Fact]
-    public async Task CanUpdateOpenHours()
+    public async Task CanUpdateOpeningHours()
     {
         await TestSinglePropertyUpdate(
-            details => details.OpenHours,
+            details => details.OpeningHours,
             oldValue =>
                 oldValue! with
                 {
                     Monday = new()
                     {
-                        State = OpenHours.OpenHoursDay.OpenState.Open,
+                        State = WeekOpeningHours.DayOpeningHours.OpenState.Open,
                         Times =
                         {
                             new() { Opens = new TimeOnly(12, 0), Closes = new TimeOnly(23, 0) },
                         },
                     },
                 },
-            input => input.OpenHours
+            input => input.OpeningHours
         );
     }
 
     [Fact]
-    public async Task CanUpdateSpecialOpenHours()
+    public async Task CanUpdateSpecialOpeningHours()
     {
         await TestSinglePropertyUpdate(
-            details => details.SpecialOpenHours,
+            details => details.SpecialOpeningHours,
             _ =>
-                new List<SpecialOpenHour>
+                new List<SpecialOpeningHour>
                 {
                     new()
                     {
@@ -158,7 +158,7 @@ public class UpdateLocationTests : UnitTestBase
                         OpenTime = new TimeOnly(10, 0),
                     },
                 },
-            input => input.SpecialOpenHours
+            input => input.SpecialOpeningHours
         );
     }
 
