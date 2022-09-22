@@ -58,7 +58,7 @@ public static class Bootstrapping
             .AddSingleton<ISerializer, Serializer>()
             .AddSingleton<IAccessTokenSource, AccessTokenSource>()
             .AddSingleton<IResponseHandler, ResponseHandler>()
-            .AddSingleton<LoggingHttpClientHandler>()
+            .AddTransient<LoggingHttpClientHandler>() // Must be transient!
             .AddHttpClient<ILocationsClient, LocationsClient>()
             .ConfigureHttpMessageHandlerBuilder(
                 b =>
