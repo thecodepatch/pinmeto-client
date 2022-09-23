@@ -33,34 +33,4 @@ public record WeekOpeningHours
     [JsonPropertyName("sun")]
     [Required]
     public DayOpeningHours Sunday { get; init; } = new();
-
-    public record DayOpeningHours
-    {
-        [JsonPropertyName("span")]
-        [Required]
-        public List<OpeningHours> Times { get; set; } = new();
-
-        [JsonPropertyName("state")]
-        [Required]
-        public OpenState State { get; set; }
-
-        public enum OpenState
-        {
-            NotSpecified,
-            Closed,
-            Open,
-            AlwaysOpen,
-        }
-
-        public record OpeningHours
-        {
-            [JsonPropertyName("close")]
-            [Required]
-            public TimeOnly Closes { get; init; }
-
-            [JsonPropertyName("open")]
-            [Required]
-            public TimeOnly Opens { get; init; }
-        }
-    }
 }

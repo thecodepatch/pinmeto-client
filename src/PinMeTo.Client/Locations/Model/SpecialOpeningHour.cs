@@ -8,11 +8,11 @@ public record SpecialOpeningHour
 {
     [JsonPropertyName("closeTime")] // TODO or endTime?
     [Required]
-    public TimeOnly CloseTime { get; init; } = default!;
+    public TimeOnly CloseTime { get; init; }
 
     [JsonPropertyName("end")]
     [Required]
-    public DateOnly End { get; init; } = default!;
+    public DateOnly End { get; init; }
 
     [JsonPropertyName("isClosed")]
     [Required]
@@ -24,9 +24,9 @@ public record SpecialOpeningHour
 
     [JsonPropertyName("openTime")]
     [Required]
-    public TimeOnly OpenTime { get; init; } = default!;
+    public TimeOnly OpenTime { get; init; }
 
     [JsonPropertyName("start")]
     [Required]
-    public DateOnly Start { get; init; } = default!;
+    public DateOnly Start { get; init; }
 }

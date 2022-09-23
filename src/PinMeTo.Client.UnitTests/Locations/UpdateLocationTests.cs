@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading.Channels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Shouldly;
@@ -129,7 +130,7 @@ public class UpdateLocationTests : UnitTestBase
                 {
                     Monday = new()
                     {
-                        State = WeekOpeningHours.DayOpeningHours.OpenState.Open,
+                        State = OpenState.Open,
                         Times =
                         {
                             new() { Opens = new TimeOnly(12, 0), Closes = new TimeOnly(23, 0) },
@@ -236,6 +237,62 @@ public class UpdateLocationTests : UnitTestBase
             pendingChangesValueSelector(detailsResult.PendingChanges)
                 .ShouldBeEquivalentTo(modifiedValue);
         }
+    }
+
+    [Fact]
+    public async Task CanAddOpeningTimeAfterSettingClosed()
+    {
+        var initial = Constants.MinimalLocation with
+        {
+            StoreId = "UNIT-TEST-CanAddOpeningTimeAfterSettingClosed",
+        };
+        var details = await _locationsClient.CreateOrUpdate(initial);
+
+        details.OpeningHours.Monday.State.ShouldBe(OpenState.NotSpecified);
+        details.OpeningHours.Monday.Times.ShouldBeEmpty();
+
+        var openingHours = new OpeningHours
+        {
+            Opens = new TimeOnly(10, 0),
+            Closes = new TimeOnly(17, 0),
+        };
+
+        // Set state to open and assign a time
+        details = await _locationsClient.UpdateLocation(
+            details.StoreId,
+            new()
+            {
+                OpeningHours = new()
+                {
+                    Monday = { State = OpenState.Open, Times = { openingHours } },
+                },
+            }
+        );
+        details.OpeningHours.Monday.State.ShouldBe(OpenState.Open);
+        details.OpeningHours.Monday.Times.ShouldHaveSingleItem().ShouldBeEquivalentTo(openingHours);
+
+        // Now set to closed
+        details = await _locationsClient.UpdateLocation(
+            details.StoreId,
+            new() { OpeningHours = new() { Monday = { State = OpenState.Closed } } }
+        );
+        details.OpeningHours.Monday.State.ShouldBe(OpenState.Closed);
+        details.OpeningHours.Monday.Times.ShouldBeEmpty();
+
+        // Now set to open again
+        details = await _locationsClient.UpdateLocation(
+            details.StoreId,
+            new()
+            {
+                OpeningHours = new()
+                {
+                    Monday = { State = OpenState.Open, Times = { openingHours } },
+                },
+            }
+        );
+
+        details.OpeningHours.ShouldNotBeNull().Monday.State.ShouldBe(OpenState.Open);
+        details.OpeningHours.Monday.Times.ShouldHaveSingleItem().ShouldBeEquivalentTo(openingHours);
     }
 
     private static void SetPropertyValue<T, TValue>(

@@ -71,11 +71,11 @@ internal static class Constants
             IsTemporarilyClosedUntil = DateOnly.FromDateTime(DateTime.Today.AddDays(10)),
         };
 
-    private static WeekOpeningHours.DayOpeningHours CreateDay(int openingTime)
+    private static DayOpeningHours CreateDay(int openingTime)
     {
         return new()
         {
-            State = WeekOpeningHours.DayOpeningHours.OpenState.Open,
+            State = OpenState.Open,
             Times =
             {
                 new()

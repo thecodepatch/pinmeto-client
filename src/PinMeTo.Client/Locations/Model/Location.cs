@@ -3,8 +3,6 @@ using System.Text.Json.Serialization;
 
 namespace TheCodePatch.PinMeTo.Client.Locations.Model;
 
-
-
 public record Location : LocationBase
 {
     [JsonPropertyName("network")]

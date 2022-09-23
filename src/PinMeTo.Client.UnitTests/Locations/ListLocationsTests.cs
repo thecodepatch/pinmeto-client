@@ -196,7 +196,7 @@ public class ListLocationsTests : UnitTestBase
             )
             .ShouldHaveNoErrors();
 
-        void TestDay(PropertyTester<WeekOpeningHours.DayOpeningHours> dayToTest)
+        void TestDay(PropertyTester<DayOpeningHours> dayToTest)
         {
             dayToTest
             // We are not testing State because there are no invalid values.
