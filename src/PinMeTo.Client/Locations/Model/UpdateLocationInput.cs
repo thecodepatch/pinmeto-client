@@ -40,7 +40,7 @@ public record UpdateLocationInput
     public WeekOpeningHours? OpeningHours { get; set; }
 
     [JsonPropertyName("specialOpenHours")]
-    public List<SpecialOpeningHour>? SpecialOpeningHours { get; set; }
+    public List<SpecialOpeningHours>? SpecialOpeningHours { get; set; }
 
     [JsonPropertyName("googleName")]
     public string? GoogleName { get; set; }

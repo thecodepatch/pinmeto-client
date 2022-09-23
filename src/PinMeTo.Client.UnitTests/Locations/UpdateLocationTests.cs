@@ -147,7 +147,7 @@ public class UpdateLocationTests : UnitTestBase
         await TestSinglePropertyUpdate(
             details => details.SpecialOpeningHours,
             _ =>
-                new List<SpecialOpeningHour>
+                new List<SpecialOpeningHours>
                 {
                     new()
                     {

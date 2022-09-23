@@ -15,7 +15,7 @@ public abstract record LocationBase
     public Address Address { get; init; } = new();
 
     [JsonPropertyName("specialOpenHours")]
-    public List<SpecialOpeningHour>? SpecialOpeningHours { get; init; }
+    public List<SpecialOpeningHours>? SpecialOpeningHours { get; init; }
 
     [JsonPropertyName("contact")]
     [Required]
