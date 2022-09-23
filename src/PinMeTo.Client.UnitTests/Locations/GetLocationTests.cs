@@ -22,6 +22,14 @@ public class GetLocationTests : UnitTestBase
     }
 
     [Fact]
+    public async Task GettingNonExistentLocationThrowsException()
+    {
+        await Assert.ThrowsAsync<NotFoundException>(
+            () => _locationsClient.Get("NonExistentStoreId")
+        );
+    }
+
+    [Fact]
     public async Task DetailsAreRetrievedForLocationWithMinimalData()
     {
         await _locationsClient.CreateOrUpdate(Constants.MinimalLocation);

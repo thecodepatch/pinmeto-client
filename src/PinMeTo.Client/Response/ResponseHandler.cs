@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Net;
 using Microsoft.Extensions.Logging;
 using TheCodePatch.PinMeTo.Client.Exceptions;
 using TheCodePatch.PinMeTo.Client.Serialization;
@@ -40,6 +41,12 @@ internal class ResponseHandler : IResponseHandler
     private async Task<Exception> ThrowFailureException(HttpResponseMessage response)
     {
         var responseContent = await response.Content.ReadAsStringAsync();
+        if (response.StatusCode == HttpStatusCode.NotFound)
+        {
+            _logger.LogError("NotFound returned from API: {ResponseContent}", responseContent);
+            return new NotFoundException(responseContent);
+        }
+
         _logger.LogError("An error was retrieved from the API: {Error}", responseContent);
         var errorModel = _serializer.Deserialize<ErrorResponse>(responseContent);
         return new PinMeToException(errorModel.Description);
