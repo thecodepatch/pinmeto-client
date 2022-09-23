@@ -32,7 +32,7 @@ public abstract record LocationBase
     public string? LocationDescriptor { get; init; }
 
     [JsonPropertyName("openHours")]
-    public WeekOpeningHours OpeningHours { get; set; }
+    public WeekOpeningHours OpeningHours { get; set; } = new();
 
     [JsonPropertyName("location")]
     [Required]

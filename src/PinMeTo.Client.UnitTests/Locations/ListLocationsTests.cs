@@ -153,13 +153,13 @@ public class ListLocationsTests : UnitTestBase
                 x => x.OpeningHours,
                 openHours =>
                     openHours
-                        .NoneShouldBeNull(o => o!.Monday, TestDay)
-                        .NoneShouldBeNull(o => o!.Tuesday, TestDay)
-                        .NoneShouldBeNull(o => o!.Wednesday, TestDay)
-                        .NoneShouldBeNull(o => o!.Thursday, TestDay)
-                        .NoneShouldBeNull(o => o!.Friday, TestDay)
-                        .NoneShouldBeNull(o => o!.Saturday, TestDay)
-                        .NoneShouldBeNull(o => o!.Sunday, TestDay)
+                        .NoneShouldBeNull(o => o.Monday, TestDay)
+                        .NoneShouldBeNull(o => o.Tuesday, TestDay)
+                        .NoneShouldBeNull(o => o.Wednesday, TestDay)
+                        .NoneShouldBeNull(o => o.Thursday, TestDay)
+                        .NoneShouldBeNull(o => o.Friday, TestDay)
+                        .NoneShouldBeNull(o => o.Saturday, TestDay)
+                        .NoneShouldBeNull(o => o.Sunday, TestDay)
             )
             .NoneShouldBeNull(
                 x => x.Position,
