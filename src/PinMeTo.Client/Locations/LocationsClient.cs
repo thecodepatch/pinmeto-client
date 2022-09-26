@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Specialized;
+using System.Net.Http.Headers;
 using Microsoft.Extensions.Options;
 using TheCodePatch.PinMeTo.Client.AccessToken;
 using TheCodePatch.PinMeTo.Client.Exceptions;
@@ -36,8 +37,8 @@ internal class LocationsClient : ILocationsClient
     public async Task<LocationDetails> Get(string storeId)
     {
         Guard.IsNotNullOrWhiteSpace(nameof(storeId), storeId);
-        var url = await GetUrl($"/{storeId}/");
-
+        await EnsureAccessToken();
+        var url = GetUrl($"/{storeId}/");
         var response = await _client.GetAsync(url);
         var result = await _responseHandler.DeserializeOrThrow<AtomicResponse<LocationDetails>>(
             response
@@ -47,7 +48,8 @@ internal class LocationsClient : ILocationsClient
 
     public async Task<LocationDetails> Create(CreateLocationInput input)
     {
-        var url = await GetUrl(null);
+        await EnsureAccessToken();
+        var url = GetUrl(null);
         var content = _serializer.MakeJson(input);
         var response = await _client.PostAsync(url, content);
         var result = await _responseHandler.DeserializeOrThrow<AtomicResponse<LocationDetails>>(
@@ -59,14 +61,26 @@ internal class LocationsClient : ILocationsClient
     public async Task<LocationDetails> CreateOrUpdate(CreateLocationInput input)
     {
         var parameters = new NameValueCollection { { "upsert", "true" } };
-        var url = await GetUrl(null, parameters);
+        await EnsureAccessToken();
+        var url = GetUrl(null, parameters);
         var content = _serializer.MakeJson(input);
-
         var response = await _client.PostAsync(url, content);
         var result = await _responseHandler.DeserializeOrThrow<AtomicResponse<LocationDetails>>(
             response
         );
         return result.Data;
+    }
+
+    private async Task EnsureAccessToken()
+    {
+        if (null == _client.DefaultRequestHeaders.Authorization)
+        {
+            var accessToken = await _accessTokenSource.GetAccessToken();
+            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
+                "Bearer",
+                accessToken
+            );
+        }
     }
 
     public async Task<PagedResult<Location>> List(PageNavigation pageNavigation)
@@ -90,7 +104,8 @@ internal class LocationsClient : ILocationsClient
             urlParameters.Add(direction, pageNavigation.Key);
         }
 
-        var url = await GetUrl(null, urlParameters);
+        await EnsureAccessToken();
+        var url = GetUrl(null, urlParameters);
 
         var response = await _client.GetAsync(url);
         var locations = await _responseHandler.DeserializeOrThrow<PagedResponse<Location>>(
@@ -102,7 +117,8 @@ internal class LocationsClient : ILocationsClient
 
     public async Task<LocationDetails> UpdateLocation(string storeId, UpdateLocationInput input)
     {
-        var url = await GetUrl($"/{storeId}/");
+        await EnsureAccessToken();
+        var url = GetUrl($"/{storeId}/");
         var content = _serializer.MakeJson(input);
         var response = await _client.PutAsync(url, content);
         var result = await _responseHandler.DeserializeOrThrow<AtomicResponse<LocationDetails>>(
@@ -111,19 +127,17 @@ internal class LocationsClient : ILocationsClient
         return result.Data;
     }
 
-    private async Task<string> GetUrl(string? path, NameValueCollection? queryParameters = null)
+    private string GetUrl(string? path, NameValueCollection? queryParameters = null)
     {
-        var accessToken = await _accessTokenSource.GetAccessToken();
         var accountIdEsc = Uri.EscapeDataString(_options.CurrentValue.AccountId);
-        var accessTokenEsc = Uri.EscapeDataString(accessToken);
-        var url = $"/v2/{accountIdEsc}/locations{path}?access_token={accessTokenEsc}";
+        var url = $"/v2/{accountIdEsc}/locations{path}";
 
         if (null != queryParameters)
         {
             var parameters = queryParameters.AllKeys.Select(
                 k => $"{k}={Uri.EscapeDataString(queryParameters.Get(k) ?? "")}"
             );
-            url += "&" + string.Join("&", parameters);
+            url += "?" + string.Join("&", parameters);
         }
 
         return url;
