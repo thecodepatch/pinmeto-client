@@ -3,7 +3,7 @@
 namespace TheCodePatch.PinMeTo.Client.AccessToken;
 
 /// <summary>
-///     An existing access token.
+///     An access token.
 /// </summary>
 internal record AccessToken
 {

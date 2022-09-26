@@ -10,17 +10,21 @@ public record PagedResult<TItems>
     public PageNavigation? NextPage { get; init; }
     public PageNavigation? PreviousPage { get; init; }
 
+    /// <summary>
+    /// Ctor that maps a deserialized PagedResponse to a PagedResult.
+    /// </summary>
+    /// <param name="response">The deserialized response.</param>
     internal PagedResult(PagedResponse<TItems> response)
     {
         Items = response.Data;
-        NextPage = CreateChangePage(PageNavigationDirection.Next, response.Paging.Next, "next");
-        PreviousPage = CreateChangePage(
+        NextPage = CreatePageNavigation(PageNavigationDirection.Next, response.Paging.Next, "next");
+        PreviousPage = CreatePageNavigation(
             PageNavigationDirection.Previous,
             response.Paging.Before,
             "before"
         );
 
-        PageNavigation? CreateChangePage(
+        PageNavigation? CreatePageNavigation(
             PageNavigationDirection direction,
             string url,
             string parameterName
