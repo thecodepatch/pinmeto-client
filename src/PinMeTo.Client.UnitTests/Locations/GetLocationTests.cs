@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using DiffEngine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Shouldly;
@@ -10,12 +11,12 @@ namespace TheCodePatch.PinMeTo.Client.UnitTests.Locations;
 
 public class GetLocationTests : UnitTestBase
 {
-    private readonly ILocationsClient _locationsClient;
+    private readonly ILocationsService _locationsService;
     private readonly UnitTestsOptions _options;
 
     public GetLocationTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        _locationsClient = ServiceProvider.GetRequiredService<ILocationsClient>();
+        _locationsService = ServiceProvider.GetRequiredService<ILocationsService>();
         _options = ServiceProvider
             .GetRequiredService<IOptionsMonitor<UnitTestsOptions>>()
             .CurrentValue;
@@ -25,15 +26,15 @@ public class GetLocationTests : UnitTestBase
     public async Task GettingNonExistentLocationThrowsException()
     {
         await Assert.ThrowsAsync<NotFoundException>(
-            () => _locationsClient.Get("NonExistentStoreId")
+            () => _locationsService.Get("NonExistentStoreId")
         );
     }
 
     [Fact]
     public async Task DetailsAreRetrievedForLocationWithMinimalData()
     {
-        await _locationsClient.CreateOrUpdate(Constants.MinimalLocation);
-        var details = await _locationsClient.Get(Constants.MinimalLocation.StoreId);
+        await _locationsService.CreateOrUpdate(Constants.MinimalLocation);
+        var details = await _locationsService.Get(Constants.MinimalLocation.StoreId);
         details.ShouldNotBeNull();
     }
 
@@ -43,9 +44,9 @@ public class GetLocationTests : UnitTestBase
     {
         // Reset the data in the API
         var expected = Constants.CompleteLocation;
-        await _locationsClient.CreateOrUpdate(expected);
+        await _locationsService.CreateOrUpdate(expected);
 
-        var details = await _locationsClient.Get(expected.StoreId);
+        var details = await _locationsService.Get(expected.StoreId);
         var d = details.ShouldNotBeNull();
 
         // d.Name.ShouldBe(expected.Name);   Seems to fall back on client name
@@ -75,6 +76,6 @@ public class GetLocationTests : UnitTestBase
     [InlineData("    ")]
     public async Task ThrowsWhenInvalidStoreId(string? storeId)
     {
-        await Assert.ThrowsAsync<InvalidInputException>(() => _locationsClient.Get(storeId!));
+        await Assert.ThrowsAsync<InvalidInputException>(() => _locationsService.Get(storeId!));
     }
 }

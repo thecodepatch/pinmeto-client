@@ -4,6 +4,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using TheCodePatch.PinMeTo.Client.Clients;
 using TheCodePatch.PinMeTo.Client.Response;
 
 namespace TheCodePatch.PinMeTo.Client.AccessToken;
@@ -47,18 +48,6 @@ internal class AccessTokenSource : IAccessTokenSource
         return await GetAccessToken();
     }
 
-    private HttpClient CreateAndSetupClient()
-    {
-        var client = _httpClientFactory.CreateClient();
-        var credentials = $"{_options.CurrentValue.AppId}:{_options.CurrentValue.AppSecret}";
-        var b64Credentials = Convert.ToBase64String(Encoding.UTF8.GetBytes(credentials));
-
-        client.BaseAddress = _options.CurrentValue.ApiBaseAddress;
-        client.DefaultRequestHeaders.Authorization = new("Basic", b64Credentials);
-        client.Timeout = TimeSpan.FromSeconds(5);
-        return client;
-    }
-
     private async Task RefreshToken()
     {
         var deserialized = await RetrieveTokenFromApi();
@@ -83,21 +72,27 @@ internal class AccessTokenSource : IAccessTokenSource
             { "client_secret", _options.CurrentValue.AppSecret },
             { "grant_type", "client_credentials" },
         };
-        var client = CreateAndSetupClient();
+        var client = _httpClientFactory.CreateClient(
+            AuthenticatedHttpClientConfigurator.HttpClientName
+        );
         var response = await client.PostAsync("/oauth/token", new FormUrlEncodedContent(message));
-        return await _responseHandler.DeserializeOrThrow<ResponseModel>(response);
+        var result = await _responseHandler.DeserializeOrThrow<ResponseModel>(response);
+        return result;
     }
 
-    [SuppressMessage("ReSharper", "AutoPropertyCanBeMadeGetOnly.Local")]
-    [SuppressMessage("ReSharper", "UnusedMember.Local")]
-    [SuppressMessage("ReSharper", "UnusedAutoPropertyAccessor.Local")]
-    [SuppressMessage("ReSharper", "ClassNeverInstantiated.Local")]
+    // ReSharper disable once ClassNeverInstantiated.Local
+    // ReSharper disable once UnusedAutoPropertyAccessor.Local
+    // ReSharper disable once UnusedMember.Local
+    // ReSharper disable once AutoPropertyCanBeMadeGetOnly.Local
     private record ResponseModel
     {
-        [JsonPropertyName("expires_in")] public int ExpiresInSeconds { get; init; }
+        [JsonPropertyName("expires_in")]
+        public int ExpiresInSeconds { get; init; }
 
-        [JsonPropertyName("token_type")] public string TokenType { get; init; } = null!;
+        [JsonPropertyName("token_type")]
+        public string TokenType { get; init; } = null!;
 
-        [JsonPropertyName("access_token")] public string Value { get; init; } = null!;
+        [JsonPropertyName("access_token")]
+        public string Value { get; init; } = null!;
     }
 }

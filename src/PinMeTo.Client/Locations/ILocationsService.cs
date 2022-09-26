@@ -3,7 +3,10 @@ using TheCodePatch.PinMeTo.Client.Locations.Model;
 
 namespace TheCodePatch.PinMeTo.Client.Locations;
 
-public interface ILocationsClient
+/// <summary>
+/// A service providing access to locations resources.
+/// </summary>
+public interface ILocationsService
 {
     /// <summary>
     /// Creates a new location.

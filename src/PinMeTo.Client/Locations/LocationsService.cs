@@ -2,7 +2,7 @@
 using System.Collections.Specialized;
 using System.Net.Http.Headers;
 using Microsoft.Extensions.Options;
-using TheCodePatch.PinMeTo.Client.AccessToken;
+using TheCodePatch.PinMeTo.Client.Clients;
 using TheCodePatch.PinMeTo.Client.Exceptions;
 using TheCodePatch.PinMeTo.Client.Locations.Model;
 using TheCodePatch.PinMeTo.Client.Response;
@@ -10,35 +10,33 @@ using TheCodePatch.PinMeTo.Client.Serialization;
 
 namespace TheCodePatch.PinMeTo.Client.Locations;
 
-internal class LocationsClient : ILocationsClient
+internal class LocationsService : ILocationsService
 {
-    private readonly IAccessTokenSource _accessTokenSource;
     private readonly HttpClient _client;
     private readonly IOptionsMonitor<PinMeToClientOptions> _options;
     private readonly ISerializer _serializer;
     private readonly IResponseHandler _responseHandler;
+    private readonly IUrlFactory _urlFactory;
 
-    public LocationsClient(
+    public LocationsService(
         HttpClient client,
         IOptionsMonitor<PinMeToClientOptions> options,
         ISerializer serializer,
-        IAccessTokenSource accessTokenSource,
-        IResponseHandler responseHandler
+        IResponseHandler responseHandler,
+        IUrlFactory urlFactory
     )
     {
         _client = client;
         _options = options;
         _serializer = serializer;
-        _accessTokenSource = accessTokenSource;
         _responseHandler = responseHandler;
-        _client.BaseAddress = options.CurrentValue.ApiBaseAddress;
+        _urlFactory = urlFactory;
     }
 
     public async Task<LocationDetails> Get(string storeId)
     {
         Guard.IsNotNullOrWhiteSpace(nameof(storeId), storeId);
-        await EnsureAccessToken();
-        var url = GetUrl($"/{storeId}/");
+        var url = _urlFactory.CreateRelativeUrl($"locations/{storeId}");
         var response = await _client.GetAsync(url);
         var result = await _responseHandler.DeserializeOrThrow<AtomicResponse<LocationDetails>>(
             response
@@ -48,8 +46,7 @@ internal class LocationsClient : ILocationsClient
 
     public async Task<LocationDetails> Create(CreateLocationInput input)
     {
-        await EnsureAccessToken();
-        var url = GetUrl(null);
+        var url = _urlFactory.CreateRelativeUrl("locations");
         var content = _serializer.MakeJson(input);
         var response = await _client.PostAsync(url, content);
         var result = await _responseHandler.DeserializeOrThrow<AtomicResponse<LocationDetails>>(
@@ -60,9 +57,7 @@ internal class LocationsClient : ILocationsClient
 
     public async Task<LocationDetails> CreateOrUpdate(CreateLocationInput input)
     {
-        var parameters = new NameValueCollection { { "upsert", "true" } };
-        await EnsureAccessToken();
-        var url = GetUrl(null, parameters);
+        var url = _urlFactory.CreateRelativeUrl("locations", ("upsert", "true"));
         var content = _serializer.MakeJson(input);
         var response = await _client.PostAsync(url, content);
         var result = await _responseHandler.DeserializeOrThrow<AtomicResponse<LocationDetails>>(
@@ -71,25 +66,13 @@ internal class LocationsClient : ILocationsClient
         return result.Data;
     }
 
-    private async Task EnsureAccessToken()
-    {
-        if (null == _client.DefaultRequestHeaders.Authorization)
-        {
-            var accessToken = await _accessTokenSource.GetAccessToken();
-            _client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue(
-                "Bearer",
-                accessToken
-            );
-        }
-    }
-
     public async Task<PagedResult<Location>> List(PageNavigation pageNavigation)
     {
         Guard.IsWithinRange(nameof(pageNavigation.PageSize), pageNavigation.PageSize, 0, 250);
 
-        var urlParameters = new NameValueCollection
+        var urlParameters = new List<(string name, string value)>()
         {
-            { "pagesize", pageNavigation.PageSize.ToString() },
+            new("pagesize", pageNavigation.PageSize.ToString()),
         };
 
         if (null != pageNavigation.Key)
@@ -98,14 +81,13 @@ internal class LocationsClient : ILocationsClient
             {
                 PageNavigationDirection.Next => "next",
                 PageNavigationDirection.Previous => "before",
-                _ => throw new ArgumentOutOfRangeException(),
+                _ => throw new ArgumentOutOfRangeException(nameof(pageNavigation)),
             };
 
-            urlParameters.Add(direction, pageNavigation.Key);
+            urlParameters.Add(new(direction, pageNavigation.Key));
         }
 
-        await EnsureAccessToken();
-        var url = GetUrl(null, urlParameters);
+        var url = _urlFactory.CreateRelativeUrl("locations", urlParameters.ToArray());
 
         var response = await _client.GetAsync(url);
         var locations = await _responseHandler.DeserializeOrThrow<PagedResponse<Location>>(
@@ -117,29 +99,12 @@ internal class LocationsClient : ILocationsClient
 
     public async Task<LocationDetails> UpdateLocation(string storeId, UpdateLocationInput input)
     {
-        await EnsureAccessToken();
-        var url = GetUrl($"/{storeId}/");
+        var url = _urlFactory.CreateRelativeUrl($"locations/{storeId}");
         var content = _serializer.MakeJson(input);
         var response = await _client.PutAsync(url, content);
         var result = await _responseHandler.DeserializeOrThrow<AtomicResponse<LocationDetails>>(
             response
         );
         return result.Data;
-    }
-
-    private string GetUrl(string? path, NameValueCollection? queryParameters = null)
-    {
-        var accountIdEsc = Uri.EscapeDataString(_options.CurrentValue.AccountId);
-        var url = $"/v2/{accountIdEsc}/locations{path}";
-
-        if (null != queryParameters)
-        {
-            var parameters = queryParameters.AllKeys.Select(
-                k => $"{k}={Uri.EscapeDataString(queryParameters.Get(k) ?? "")}"
-            );
-            url += "?" + string.Join("&", parameters);
-        }
-
-        return url;
     }
 }

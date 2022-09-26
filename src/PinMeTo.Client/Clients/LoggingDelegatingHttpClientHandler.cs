@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 
-namespace TheCodePatch.PinMeTo.Client.Communication;
+namespace TheCodePatch.PinMeTo.Client.Clients;
 
-internal class LoggingHttpClientHandler : DelegatingHandler
+internal class LoggingDelegatingHttpClientHandler : DelegatingHandler
 {
-    private readonly ILogger<LoggingHttpClientHandler> _logger;
+    private readonly ILogger<LoggingDelegatingHttpClientHandler> _logger;
 
-    public LoggingHttpClientHandler(ILogger<LoggingHttpClientHandler> logger)
+    public LoggingDelegatingHttpClientHandler(ILogger<LoggingDelegatingHttpClientHandler> logger)
     {
         _logger = logger;
     }

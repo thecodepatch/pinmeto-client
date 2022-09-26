@@ -7,22 +7,22 @@ namespace TheCodePatch.PinMeTo.Client.UnitTests.Locations;
 
 public class CreateLocationTests : UnitTestBase
 {
-    private readonly ILocationsClient _locationsClient;
+    private readonly ILocationsService _locationsService;
 
     public CreateLocationTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        _locationsClient = ServiceProvider.GetRequiredService<ILocationsClient>();
+        _locationsService = ServiceProvider.GetRequiredService<ILocationsService>();
     }
 
     [Fact]
     public async Task CanCreateCompleteLocation()
     {
-        await _locationsClient.CreateOrUpdate(Constants.CompleteLocation);
+        await _locationsService.CreateOrUpdate(Constants.CompleteLocation);
     }
 
     [Fact]
     public async Task CanCreateMinimalLocation()
     {
-        await _locationsClient.CreateOrUpdate(Constants.MinimalLocation);
+        await _locationsService.CreateOrUpdate(Constants.MinimalLocation);
     }
 }

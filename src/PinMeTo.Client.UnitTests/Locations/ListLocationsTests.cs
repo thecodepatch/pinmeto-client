@@ -10,17 +10,17 @@ namespace TheCodePatch.PinMeTo.Client.UnitTests.Locations;
 
 public class ListLocationsTests : UnitTestBase
 {
-    private readonly ILocationsClient _locationsClient;
+    private readonly ILocationsService _locationsService;
 
     public ListLocationsTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        _locationsClient = ServiceProvider.GetRequiredService<ILocationsClient>();
+        _locationsService = ServiceProvider.GetRequiredService<ILocationsService>();
     }
 
     [Fact]
     public async Task CanList()
     {
-        var response = await _locationsClient.List(new PageNavigation(100));
+        var response = await _locationsService.List(new PageNavigation(100));
         response.Items.ShouldNotBeEmpty();
     }
 
@@ -28,23 +28,23 @@ public class ListLocationsTests : UnitTestBase
     [Fact]
     public async Task CanNavigatePages()
     {
-        var allSamplePagesResponse = await _locationsClient.List(new(3));
+        var allSamplePagesResponse = await _locationsService.List(new(3));
         allSamplePagesResponse.Items.Count.ShouldBe(3, "This test requires at least 3 locations.");
 
-        var page1Result = await _locationsClient.List(new(1));
+        var page1Result = await _locationsService.List(new(1));
         AssertResult(page1Result, 1, false, true, out _, out var nextIsPage2Nav);
 
-        var page2Result = await _locationsClient.List(nextIsPage2Nav!);
+        var page2Result = await _locationsService.List(nextIsPage2Nav!);
         AssertResult(page2Result, 2, true, true, out _, out var nextIsPage3Nav);
 
-        var page3Result = await _locationsClient.List(nextIsPage3Nav!);
+        var page3Result = await _locationsService.List(nextIsPage3Nav!);
         AssertResult(page3Result, 3, true, null, out var prevIsPage2Nav, out _);
 
         // Turn around and reverse down towards page 1.
-        page2Result = await _locationsClient.List(prevIsPage2Nav!);
+        page2Result = await _locationsService.List(prevIsPage2Nav!);
         AssertResult(page2Result, 2, true, true, out var prevIsPage1Nav, out nextIsPage3Nav);
 
-        page1Result = await _locationsClient.List(prevIsPage1Nav!);
+        page1Result = await _locationsService.List(prevIsPage1Nav!);
         AssertResult(page1Result, 1, false, true, out _, out _);
 
         void AssertResult(
@@ -101,7 +101,7 @@ public class ListLocationsTests : UnitTestBase
     [Fact]
     public async Task ThrowsWhenPageSizeIsOutOfBounds()
     {
-        await Assert.ThrowsAsync<InvalidInputException>(() => _locationsClient.List(new(251)));
+        await Assert.ThrowsAsync<InvalidInputException>(() => _locationsService.List(new(251)));
     }
 
     [Fact]
@@ -217,7 +217,7 @@ public class ListLocationsTests : UnitTestBase
         var nextPage = new PageNavigation(250);
         do
         {
-            var result = await _locationsClient.List(nextPage);
+            var result = await _locationsService.List(nextPage);
             retval.AddRange(result.Items);
             nextPage = result.NextPage;
         } while (null != nextPage);

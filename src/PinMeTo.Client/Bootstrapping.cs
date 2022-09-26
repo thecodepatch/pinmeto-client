@@ -1,8 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Net.Http.Headers;
+using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using TheCodePatch.PinMeTo.Client.AccessToken;
-using TheCodePatch.PinMeTo.Client.Communication;
+using TheCodePatch.PinMeTo.Client.Clients;
 using TheCodePatch.PinMeTo.Client.Locations;
 using TheCodePatch.PinMeTo.Client.Response;
 using TheCodePatch.PinMeTo.Client.Serialization;
@@ -56,16 +59,15 @@ public static class Bootstrapping
     {
         return services
             .AddSingleton<ISerializer, Serializer>()
-            .AddSingleton<IAccessTokenSource, AccessTokenSource>()
+            .AddSingleton<IUrlFactory, UrlFactory>()
             .AddSingleton<IResponseHandler, ResponseHandler>()
-            .AddTransient<LoggingHttpClientHandler>() // Must be transient!
-            .AddHttpClient<ILocationsClient, LocationsClient>()
-            .ConfigureHttpMessageHandlerBuilder(
-                b =>
-                    b.AdditionalHandlers.Add(
-                        b.Services.GetRequiredService<LoggingHttpClientHandler>()
-                    )
-            )
+            // Add the http client authenticated to communicate with the PinMeTo API.
+            .AddAndConfigureAuthenticatedHttpClient()
+            .AddSingleton<IAccessTokenSource, AccessTokenSource>()
+            // Add the http client authorized to use resources provided by the PinMeTo API.
+            .AddAndConfigureAuthorizedHttpClient(out var authorizedHttpClientName)
+            // Add the service providing access to the Locations resources in the API.
+            .AddHttpClient<ILocationsService, LocationsService>(authorizedHttpClientName)
             .Services;
     }
 }

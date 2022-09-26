@@ -13,12 +13,12 @@ namespace TheCodePatch.PinMeTo.Client.UnitTests.Locations;
 
 public class UpdateLocationTests : UnitTestBase
 {
-    private readonly ILocationsClient _locationsClient;
+    private readonly ILocationsService _locationsService;
     private readonly IOptionsMonitor<UnitTestsOptions> _options;
 
     public UpdateLocationTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        _locationsClient = ServiceProvider.GetRequiredService<ILocationsClient>();
+        _locationsService = ServiceProvider.GetRequiredService<ILocationsService>();
         _options = ServiceProvider.GetRequiredService<IOptionsMonitor<UnitTestsOptions>>();
     }
 
@@ -207,7 +207,7 @@ public class UpdateLocationTests : UnitTestBase
     )
     {
         // Reset the data in the API and get the baseline data.
-        var initial = await _locationsClient.CreateOrUpdate(Constants.CompleteLocation);
+        var initial = await _locationsService.CreateOrUpdate(Constants.CompleteLocation);
 
         var valueFromBaseline = detailsValuePropertySelector(initial);
         var modifiedValue = valueModifier(valueFromBaseline);
@@ -217,12 +217,12 @@ public class UpdateLocationTests : UnitTestBase
         SetPropertyValue(updateInput, updateInputPropertySelector, modifiedValue);
 
         // Perform the update.
-        var updateResult = await _locationsClient.UpdateLocation(
+        var updateResult = await _locationsService.UpdateLocation(
             Constants.CompleteLocation.StoreId,
             updateInput
         );
 
-        var detailsResult = await _locationsClient.Get(Constants.CompleteLocation.StoreId);
+        var detailsResult = await _locationsService.Get(Constants.CompleteLocation.StoreId);
 
         if (null == pendingChangesValueSelector)
         {
@@ -246,7 +246,7 @@ public class UpdateLocationTests : UnitTestBase
         {
             StoreId = "UNIT-TEST-CanAddOpeningTimeAfterSettingClosed",
         };
-        var details = await _locationsClient.CreateOrUpdate(initial);
+        var details = await _locationsService.CreateOrUpdate(initial);
 
         details.OpeningHours.Monday.State.ShouldBe(OpenState.NotSpecified);
         details.OpeningHours.Monday.Times.ShouldBeEmpty();
@@ -258,7 +258,7 @@ public class UpdateLocationTests : UnitTestBase
         };
 
         // Set state to open and assign a time
-        details = await _locationsClient.UpdateLocation(
+        details = await _locationsService.UpdateLocation(
             details.StoreId,
             new()
             {
@@ -272,7 +272,7 @@ public class UpdateLocationTests : UnitTestBase
         details.OpeningHours.Monday.Times.ShouldHaveSingleItem().ShouldBeEquivalentTo(openingHours);
 
         // Now set to closed
-        details = await _locationsClient.UpdateLocation(
+        details = await _locationsService.UpdateLocation(
             details.StoreId,
             new() { OpeningHours = new() { Monday = { State = OpenState.Closed } } }
         );
@@ -280,7 +280,7 @@ public class UpdateLocationTests : UnitTestBase
         details.OpeningHours.Monday.Times.ShouldBeEmpty();
 
         // Now set to open again
-        details = await _locationsClient.UpdateLocation(
+        details = await _locationsService.UpdateLocation(
             details.StoreId,
             new()
             {
