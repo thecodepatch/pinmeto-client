@@ -47,8 +47,23 @@ internal class ResponseHandler : IResponseHandler
             return new NotFoundException(responseContent);
         }
 
-        _logger.LogError("An error was retrieved from the API: {Error}", responseContent);
         var errorModel = _serializer.Deserialize<ErrorResponse>(responseContent);
+        if (
+            response.StatusCode == HttpStatusCode.BadRequest
+            && errorModel.Error == "invalid_request"
+        )
+        {
+            _logger.LogError(
+                "Invalid Request returned from API: {ResponseContent}",
+                responseContent
+            );
+            return new InvalidPinMeToRequestException(errorModel.Description);
+        }
+
+        _logger.LogError(
+            "An unexpected error was retrieved from the API: {Error}",
+            responseContent
+        );
         return new PinMeToException(errorModel.Description);
     }
 }

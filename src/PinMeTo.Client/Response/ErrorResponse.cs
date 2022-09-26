@@ -12,8 +12,8 @@ internal record ErrorResponse
     public string Description { get; init; } = null!;
 
     [JsonPropertyName("code")]
-    public int ErrorCode { get; init; }
+    public int Code { get; init; }
 
     [JsonPropertyName("error")]
-    public string Name { get; init; } = null!;
+    public string Error { get; init; } = null!;
 }
