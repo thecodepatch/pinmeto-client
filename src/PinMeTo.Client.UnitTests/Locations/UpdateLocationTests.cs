@@ -14,12 +14,12 @@ namespace TheCodePatch.PinMeTo.Client.UnitTests.Locations;
 
 public class UpdateLocationTests : UnitTestBase
 {
-    private readonly ILocationsService _locationsService;
+    private readonly ILocationsService<TestCustomData> _locationsService;
     private readonly IOptionsMonitor<UnitTestsOptions> _options;
 
     public UpdateLocationTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        _locationsService = ServiceProvider.GetRequiredService<ILocationsService>();
+        _locationsService = ServiceProvider.GetRequiredService<ILocationsService<TestCustomData>>();
         _options = ServiceProvider.GetRequiredService<IOptionsMonitor<UnitTestsOptions>>();
     }
 
@@ -201,9 +201,11 @@ public class UpdateLocationTests : UnitTestBase
     }
 
     async Task TestSinglePropertyUpdate<TValueToUpdate>(
-        Func<LocationDetails, TValueToUpdate> detailsValuePropertySelector,
+        Func<LocationDetails<TestCustomData>, TValueToUpdate> detailsValuePropertySelector,
         Func<TValueToUpdate, TValueToUpdate> valueModifier,
-        Expression<Func<UpdateLocationInput, TValueToUpdate>> updateInputPropertySelector,
+        Expression<
+            Func<UpdateLocationInput<TestCustomData>, TValueToUpdate>
+        > updateInputPropertySelector,
         Func<PendingChanges, TValueToUpdate>? pendingChangesValueSelector = null
     )
     {
@@ -214,7 +216,7 @@ public class UpdateLocationTests : UnitTestBase
         var modifiedValue = valueModifier(valueFromBaseline);
 
         // Set the modified value to the update input data.
-        var updateInput = new UpdateLocationInput();
+        var updateInput = new UpdateLocationInput<TestCustomData>();
         SetPropertyValue(updateInput, updateInputPropertySelector, modifiedValue);
 
         // Perform the update.

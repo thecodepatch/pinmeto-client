@@ -10,7 +10,7 @@ namespace TheCodePatch.PinMeTo.Client.Locations.Model;
 /// field like 'Address.Street' or 'OpeningHours.Thu' you have to include all fields in that property,
 /// not just the field you want to update.
 /// </summary>
-public record UpdateLocationInput
+public record UpdateLocationInput<TCustomData>
 {
     [JsonPropertyName("description")]
     public Description? Description { get; set; }
@@ -53,5 +53,5 @@ public record UpdateLocationInput
     public string? WifiSsid { get; set; }
 
     [JsonPropertyName("customData")]
-    public Dictionary<string, object>? CustomData { get; set; }
+    public TCustomData? CustomData { get; set; }
 }

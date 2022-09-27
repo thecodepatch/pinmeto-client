@@ -10,20 +10,20 @@ using TheCodePatch.PinMeTo.Client.Serialization;
 
 namespace TheCodePatch.PinMeTo.Client.Locations;
 
-internal class LocationsService : ILocationsService
+internal class LocationsService<TCustomData> : ILocationsService<TCustomData>
 {
     private readonly HttpClient _client;
     private readonly ISerializer _serializer;
     private readonly IResponseHandler _responseHandler;
     private readonly IUrlFactory _urlFactory;
-    private readonly ILogger<LocationsService> _logger;
+    private readonly ILogger<LocationsService<TCustomData>> _logger;
 
     public LocationsService(
         HttpClient client,
         ISerializer serializer,
         IResponseHandler responseHandler,
         IUrlFactory urlFactory,
-        ILogger<LocationsService> logger
+        ILogger<LocationsService<TCustomData>> logger
     )
     {
         _client = client;
@@ -33,40 +33,40 @@ internal class LocationsService : ILocationsService
         _logger = logger;
     }
 
-    public async Task<PinMeToResult<LocationDetails>> Get(string storeId)
+    public async Task<PinMeToResult<LocationDetails<TCustomData>>> Get(string storeId)
     {
         Guard.IsNotNullOrWhiteSpace(nameof(storeId), storeId);
         var url = _urlFactory.CreateRelativeUrl($"locations/{storeId}");
         var response = await _client.GetAsync(url);
-        var result = await _responseHandler.DeserializeOrThrow<AtomicResponse<LocationDetails>>(
+        var result = await _responseHandler.DeserializeOrThrow<AtomicResponse<LocationDetails<TCustomData>>>(
             response
         );
         return WrapInResult(response, result.Data);
     }
 
-    public async Task<PinMeToResult<LocationDetails>> Create(CreateLocationInput input)
+    public async Task<PinMeToResult<LocationDetails<TCustomData>>> Create(CreateLocationInput<TCustomData> input)
     {
         var url = _urlFactory.CreateRelativeUrl("locations");
         var content = _serializer.MakeJson(input);
         var response = await _client.PostAsync(url, content);
-        var result = await _responseHandler.DeserializeOrThrow<AtomicResponse<LocationDetails>>(
+        var result = await _responseHandler.DeserializeOrThrow<AtomicResponse<LocationDetails<TCustomData>>>(
             response
         );
         return WrapInResult(response, result.Data);
     }
 
-    public async Task<PinMeToResult<LocationDetails>> CreateOrUpdate(CreateLocationInput input)
+    public async Task<PinMeToResult<LocationDetails<TCustomData>>> CreateOrUpdate(CreateLocationInput<TCustomData> input)
     {
         var url = _urlFactory.CreateRelativeUrl("locations", ("upsert", "true"));
         var content = _serializer.MakeJson(input);
         var response = await _client.PostAsync(url, content);
-        var result = await _responseHandler.DeserializeOrThrow<AtomicResponse<LocationDetails>>(
+        var result = await _responseHandler.DeserializeOrThrow<AtomicResponse<LocationDetails<TCustomData>>>(
             response
         );
         return WrapInResult(response, result.Data);
     }
 
-    public async Task<PinMeToResult<PagedResult<Location>>> List(PageNavigation pageNavigation)
+    public async Task<PinMeToResult<PagedResult<Location<TCustomData>>>> List(PageNavigation pageNavigation)
     {
         Guard.IsWithinRange(nameof(pageNavigation.PageSize), pageNavigation.PageSize, 0, 250);
 
@@ -90,22 +90,22 @@ internal class LocationsService : ILocationsService
         var url = _urlFactory.CreateRelativeUrl("locations", urlParameters.ToArray());
 
         var response = await _client.GetAsync(url);
-        var locations = await _responseHandler.DeserializeOrThrow<PagedResponse<Location>>(
+        var locations = await _responseHandler.DeserializeOrThrow<PagedResponse<Location<TCustomData>>>(
             response
         );
 
-        return WrapInResult(response, new PagedResult<Location>(locations));
+        return WrapInResult(response, new PagedResult<Location<TCustomData>>(locations));
     }
 
-    public async Task<PinMeToResult<LocationDetails>> UpdateLocation(
+    public async Task<PinMeToResult<LocationDetails<TCustomData>>> UpdateLocation(
         string storeId,
-        UpdateLocationInput input
+        UpdateLocationInput<TCustomData> input
     )
     {
         var url = _urlFactory.CreateRelativeUrl($"locations/{storeId}");
         var content = _serializer.MakeJson(input);
         var response = await _client.PutAsync(url, content);
-        var result = await _responseHandler.DeserializeOrThrow<AtomicResponse<LocationDetails>>(
+        var result = await _responseHandler.DeserializeOrThrow<AtomicResponse<LocationDetails<TCustomData>>>(
             response
         );
         return WrapInResult(response, result.Data);

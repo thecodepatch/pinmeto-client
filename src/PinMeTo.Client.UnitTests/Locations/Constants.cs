@@ -10,7 +10,7 @@ internal static class Constants
     /// <summary>
     /// A location that has only required values populated.
     /// </summary>
-    public static readonly CreateLocationInput MinimalLocation =
+    public static readonly CreateLocationInput<TestCustomData> MinimalLocation =
         new()
         {
             StoreId = "UNIT-TEST-STORE-NOT-REAL-MINIMAL",
@@ -26,7 +26,7 @@ internal static class Constants
     /// <summary>
     /// A location that has all values populated.
     /// </summary>
-    public static readonly CreateLocationInput CompleteLocation =
+    public static readonly CreateLocationInput<TestCustomData> CompleteLocation =
         new()
         {
             StoreId = "UNIT-TEST-STORE-NOT-REAL",

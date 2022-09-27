@@ -3,6 +3,7 @@ using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using TheCodePatch.PinMeTo.Client.UnitTests.Locations;
 using Xunit.Abstractions;
 
 // ReSharper disable VirtualMemberCallInConstructor
@@ -38,7 +39,7 @@ public abstract class UnitTestBase : IAsyncLifetime
 
         var serviceCollection = new ServiceCollection()
             // Bootstrap the PinMeTwo client library.
-            .AddPinMeToClient(conf.GetSection("PinMeToClient"))
+            .AddPinMeToClient<TestCustomData>(conf.GetSection("PinMeToClient"))
             // Redirect ILogger logging to the XUnit output.
             .AddLogging(l => l.SetMinimumLevel(LogLevel.Debug).AddXunit(testOutputHelper))
             // Get options for unit tests from configuration files.

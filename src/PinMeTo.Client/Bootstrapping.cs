@@ -20,13 +20,13 @@ public static class Bootstrapping
     /// <param name="services">The service collection.</param>
     /// <param name="configure">Configurator for the options of the client.</param>
     /// <returns>The service collection.</returns>
-    public static IServiceCollection AddPinMeToClient(
+    public static IServiceCollection AddPinMeToClient<TCustomData>(
         this IServiceCollection services,
         Action<PinMeToClientOptions> configure
     )
     {
         return services
-            .AddPinMeToClientInternal()
+            .AddPinMeToClientInternal<TCustomData>()
             .AddOptions<PinMeToClientOptions>()
             .Configure(configure)
             .ValidateDataAnnotations()
@@ -42,20 +42,20 @@ public static class Bootstrapping
     ///     <see cref="PinMeToClientOptions" />.
     /// </param>
     /// <returns>The service collection.</returns>
-    public static IServiceCollection AddPinMeToClient(
+    public static IServiceCollection AddPinMeToClient<TCustomData>(
         this IServiceCollection services,
         IConfigurationSection configurationSection
     )
     {
         return services
-            .AddPinMeToClientInternal()
+            .AddPinMeToClientInternal<TCustomData>()
             .AddOptions<PinMeToClientOptions>()
             .Bind(configurationSection)
             .ValidateDataAnnotations()
             .Services;
     }
 
-    private static IServiceCollection AddPinMeToClientInternal(this IServiceCollection services)
+    private static IServiceCollection AddPinMeToClientInternal<TCustomData>(this IServiceCollection services)
     {
         return services
             .AddSingleton<ISerializer, Serializer>()
@@ -67,7 +67,7 @@ public static class Bootstrapping
             // Add the http client authorized to use resources provided by the PinMeTo API.
             .AddAndConfigureAuthorizedHttpClient(out var authorizedHttpClientName)
             // Add the service providing access to the Locations resources in the API.
-            .AddHttpClient<ILocationsService, LocationsService>(authorizedHttpClientName)
+            .AddHttpClient<ILocationsService<TCustomData>, LocationsService<TCustomData>>(authorizedHttpClientName)
             .Services;
     }
 }

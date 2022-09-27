@@ -9,11 +9,11 @@ namespace TheCodePatch.PinMeTo.Client.UnitTests.Locations;
 
 public class CreateLocationTests : UnitTestBase
 {
-    private readonly ILocationsService _locationsService;
+    private readonly ILocationsService<TestCustomData> _locationsService;
 
     public CreateLocationTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        _locationsService = ServiceProvider.GetRequiredService<ILocationsService>();
+        _locationsService = ServiceProvider.GetRequiredService<ILocationsService<TestCustomData>>();
     }
 
     [Fact]

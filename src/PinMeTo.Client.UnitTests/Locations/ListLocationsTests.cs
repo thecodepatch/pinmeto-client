@@ -10,11 +10,11 @@ namespace TheCodePatch.PinMeTo.Client.UnitTests.Locations;
 
 public class ListLocationsTests : UnitTestBase
 {
-    private readonly ILocationsService _locationsService;
+    private readonly ILocationsService<TestCustomData> _locationsService;
 
     public ListLocationsTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
-        _locationsService = ServiceProvider.GetRequiredService<ILocationsService>();
+        _locationsService = ServiceProvider.GetRequiredService<ILocationsService<TestCustomData>>();
     }
 
     [Fact]
@@ -51,7 +51,7 @@ public class ListLocationsTests : UnitTestBase
         AssertResult(page1Result, 1, false, true, out _, out _);
 
         void AssertResult(
-            PinMeToResult<PagedResult<Location>> result,
+            PinMeToResult<PagedResult<Location<TestCustomData>>> result,
             int pageNumber,
             bool expectPrev,
             bool? expectNext,
@@ -112,9 +112,9 @@ public class ListLocationsTests : UnitTestBase
     [Fact]
     public async Task AllPropertiesAreSetAsExpected()
     {
-        List<Location> allLocations = await GetAllLocations();
+        List<Location<TestCustomData>> allLocations = await GetAllLocations();
 
-        new PropertyTester<Location>(allLocations)
+        new PropertyTester<Location<TestCustomData>>(allLocations)
             .NoneShouldBeNullOrWhiteSpace(x => x.StoreId)
             .NoneShouldBeNullOrWhiteSpace(x => x.Name)
             .SomeShouldNotBeNullOrWhiteSpace(x => x.LocationDescriptor)
@@ -216,9 +216,9 @@ public class ListLocationsTests : UnitTestBase
         }
     }
 
-    private async Task<List<Location>> GetAllLocations()
+    private async Task<List<Location<TestCustomData>>> GetAllLocations()
     {
-        var retval = new List<Location>();
+        var retval = new List<Location<TestCustomData>>();
         var nextPage = new PageNavigation(250);
         do
         {

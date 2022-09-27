@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace TheCodePatch.PinMeTo.Client.Locations.Model;
 
-public record CreateLocationInput : LocationBase
+public record CreateLocationInput<TCustomData> : LocationBase<TCustomData>
 {
     [JsonPropertyName("permanentlyClosed")]
     public bool? IsPermanentlyClosed { get; set; }

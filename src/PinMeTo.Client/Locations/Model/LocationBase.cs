@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace TheCodePatch.PinMeTo.Client.Locations.Model;
 
-public abstract record LocationBase
+public abstract record LocationBase<TCustomData>
 {
     [JsonPropertyName("storeId")]
     [Required]
@@ -39,5 +39,5 @@ public abstract record LocationBase
     public Position Position { get; init; } = new();
 
     [JsonPropertyName("customData")]
-    public Dictionary<string, object>? CustomData { get; init; }
+    public TCustomData? CustomData { get; init; }
 }
