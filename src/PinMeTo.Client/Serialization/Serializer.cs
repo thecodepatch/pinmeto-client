@@ -28,6 +28,11 @@ internal class Serializer : ISerializer
             ?? throw new DeserializationException();
     }
 
+    public string Serialize<T>(T data)
+    {
+        return JsonSerializer.Serialize(data, _options);
+    }
+
     public JsonContent MakeJson<T>(T data)
     {
         return JsonContent.Create(data, null, _options);

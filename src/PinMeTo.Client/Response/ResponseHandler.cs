@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Net;
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using TheCodePatch.PinMeTo.Client.Exceptions;
 using TheCodePatch.PinMeTo.Client.Serialization;
@@ -72,7 +73,28 @@ internal class ResponseHandler : IResponseHandler
                 var validationErrors = _serializer.Deserialize<
                     AtomicResponse<Dictionary<string, List<string>>>
                 >(responseContent);
-                return new ValidationErrorsException(validationErrors.Data);
+                // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+                if (null != validationErrors.Data)
+                {
+                    _logger.LogWarning(
+                        "Validation errors 1: {ValidationErrors}",
+                        _serializer.Serialize(validationErrors.Data)
+                    );
+                    return new ValidationErrorsException(validationErrors.Data);
+                }
+
+                var validationErrors2 = _serializer.Deserialize<Dictionary<string, List<string>>>(
+                    responseContent
+                );
+                // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+                if (null != validationErrors2)
+                {
+                    _logger.LogWarning(
+                        "Validation errors 2: {ValidationErrors}",
+                        _serializer.Serialize(validationErrors2)
+                    );
+                    return new ValidationErrorsException(validationErrors2);
+                }
             }
             catch (Exception e)
             {

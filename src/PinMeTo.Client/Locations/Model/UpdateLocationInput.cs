@@ -53,5 +53,5 @@ public record UpdateLocationInput
     public string? WifiSsid { get; set; }
 
     [JsonPropertyName("customData")]
-    public object? CustomData { get; set; }
+    public Dictionary<string, object>? CustomData { get; set; }
 }

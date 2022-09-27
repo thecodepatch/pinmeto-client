@@ -26,7 +26,7 @@ public interface ILocationsService
     /// Gets details for a location.
     /// </summary>
     /// <param name="storeId"></param>
-    /// <returns></returns>
+    /// <returns>The location details.</returns>
     Task<PinMeToResult<LocationDetails>> Get(string storeId);
 
     /// <summary>

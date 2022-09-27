@@ -66,7 +66,7 @@ public class GetLocationTests : UnitTestBase
         d.Result.FacebookName.ShouldBe(
             _options.IsFacebookCustomNameEnabled ? expected.FacebookName : null
         );
-
+        d.Result.CustomData.ShouldBeEquivalentTo(expected.CustomData);
         d.Result.GoogleName.ShouldBe(
             _options.IsGoogleCustomNameEnabled ? expected.GoogleName : null
         );

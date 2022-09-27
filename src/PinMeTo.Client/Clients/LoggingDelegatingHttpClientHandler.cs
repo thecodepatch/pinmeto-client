@@ -20,7 +20,12 @@ internal class LoggingDelegatingHttpClientHandler : DelegatingHandler
         if (_logger.IsEnabled(LogLevel.Debug) && null != request.Content)
         {
             var content = await request.Content.ReadAsStringAsync(cancellationToken);
-            _logger.LogDebug("Submitting request: {RequestContent}", content);
+            _logger.LogDebug(
+                "Submitting {Method} request to {Url}: {RequestContent}",
+                request.Method,
+                request.RequestUri,
+                content
+            );
         }
 
         return await base.SendAsync(request, cancellationToken);

@@ -37,4 +37,7 @@ public abstract record LocationBase
     [JsonPropertyName("location")]
     [Required]
     public Position Position { get; init; } = new();
+
+    [JsonPropertyName("customData")]
+    public Dictionary<string, object>? CustomData { get; init; }
 }

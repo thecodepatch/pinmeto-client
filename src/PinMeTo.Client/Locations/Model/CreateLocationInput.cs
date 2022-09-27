@@ -22,9 +22,6 @@ public record CreateLocationInput : LocationBase
     [MaxLength(32)]
     public string? WifiSsid { get; set; }
 
-    [JsonPropertyName("customData")]
-    public object? CustomData { get; set; }
-
     [JsonPropertyName("googleName")]
     public string? GoogleName { get; set; }
 }

@@ -1,4 +1,6 @@
-﻿namespace TheCodePatch.PinMeTo.Client.Exceptions;
+﻿using System.Text.Json;
+
+namespace TheCodePatch.PinMeTo.Client.Exceptions;
 
 /// <summary>
 /// Thrown when there are validation errors.
@@ -11,7 +13,7 @@ public class ValidationErrorsException : Exception
     public IDictionary<string, List<string>> ValidationErrors { get; }
 
     internal ValidationErrorsException(IDictionary<string, List<string>> validationErrors)
-        : base("Validation errror(s) occurred")
+        : base("Validation errror(s) occurred: " + JsonSerializer.Serialize(validationErrors))
     {
         ValidationErrors = validationErrors;
     }

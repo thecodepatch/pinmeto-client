@@ -47,7 +47,6 @@ internal static class Constants
             Description = new() { Long = "a long description", Short = "a short description" },
             Name = "A test location",
             Position = { Latitude = 56.2328943, Longitude = 12.8168534 },
-            CustomData = null,
             FacebookName = "fbname",
             GoogleName = "some google name",
             LocationDescriptor = "some location descriptor",
