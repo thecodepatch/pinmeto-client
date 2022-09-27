@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net.Http.Headers;
-using Microsoft.Extensions.Options;
 using TheCodePatch.PinMeTo.Client.Clients;
 using TheCodePatch.PinMeTo.Client.Exceptions;
 using TheCodePatch.PinMeTo.Client.Locations.Model;
@@ -13,21 +12,18 @@ namespace TheCodePatch.PinMeTo.Client.Locations;
 internal class LocationsService : ILocationsService
 {
     private readonly HttpClient _client;
-    private readonly IOptionsMonitor<PinMeToClientOptions> _options;
     private readonly ISerializer _serializer;
     private readonly IResponseHandler _responseHandler;
     private readonly IUrlFactory _urlFactory;
 
     public LocationsService(
         HttpClient client,
-        IOptionsMonitor<PinMeToClientOptions> options,
         ISerializer serializer,
         IResponseHandler responseHandler,
         IUrlFactory urlFactory
     )
     {
         _client = client;
-        _options = options;
         _serializer = serializer;
         _responseHandler = responseHandler;
         _urlFactory = urlFactory;
