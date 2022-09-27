@@ -7,5 +7,5 @@ namespace TheCodePatch.PinMeTo.Client.Exceptions;
 /// </summary>
 public class PinMeToException : Exception
 {
-    public PinMeToException(string message) : base(message) { }
+    internal PinMeToException(string message) : base(message) { }
 }

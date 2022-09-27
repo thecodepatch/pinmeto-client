@@ -5,5 +5,5 @@
 /// </summary>
 public class InvalidPinMeToRequestException : Exception
 {
-    public InvalidPinMeToRequestException(string message) : base(message) { }
+    internal InvalidPinMeToRequestException(string message) : base(message) { }
 }

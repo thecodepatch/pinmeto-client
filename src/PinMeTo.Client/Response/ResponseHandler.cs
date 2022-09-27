@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 using Microsoft.Extensions.Logging;
 using TheCodePatch.PinMeTo.Client.Exceptions;
@@ -41,29 +42,62 @@ internal class ResponseHandler : IResponseHandler
     private async Task<Exception> ThrowFailureException(HttpResponseMessage response)
     {
         var responseContent = await response.Content.ReadAsStringAsync();
-        if (response.StatusCode == HttpStatusCode.NotFound)
+        return response.StatusCode switch
+        {
+            HttpStatusCode.NotFound => NotFound(),
+            HttpStatusCode.BadRequest => BadRequest(),
+            HttpStatusCode.UnprocessableEntity => UnprocessableEntity(),
+            _ => Unexpected(),
+        };
+
+        Exception NotFound()
         {
             _logger.LogError("NotFound returned from API: {ResponseContent}", responseContent);
             return new NotFoundException(responseContent);
         }
-
-        var errorModel = _serializer.Deserialize<ErrorResponse>(responseContent);
-        if (
-            response.StatusCode == HttpStatusCode.BadRequest
-            && errorModel.Error == "invalid_request"
-        )
+        Exception BadRequest()
         {
+            var errorModel = _serializer.Deserialize<ErrorResponse>(responseContent);
+            if (errorModel.Error == "invalid_request")
+            {
+                _logger.LogError(
+                    "Invalid Request returned from API: {ResponseContent}",
+                    responseContent
+                );
+                return new InvalidPinMeToRequestException(errorModel.Description);
+            }
+
+            try
+            {
+                var validationErrors = _serializer.Deserialize<
+                    AtomicResponse<Dictionary<string, List<string>>>
+                >(responseContent);
+                return new ValidationErrorsException(validationErrors.Data);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failed to deserialize validation errors");
+            }
+
             _logger.LogError(
-                "Invalid Request returned from API: {ResponseContent}",
+                "Unexpected BadRequest returned from API: {ResponseContent}",
                 responseContent
             );
-            return new InvalidPinMeToRequestException(errorModel.Description);
+            return new PinMeToException("Unexpected bad request");
         }
 
-        _logger.LogError(
-            "An unexpected error was retrieved from the API: {Error}",
-            responseContent
-        );
-        return new PinMeToException(errorModel.Description);
+        Exception UnprocessableEntity()
+        {
+            return new MissingRequiredPropertyException(responseContent);
+        }
+        Exception Unexpected()
+        {
+            _logger.LogError(
+                "An unexpected error was retrieved from the API {StatusCode}: {ResponseContent}",
+                response.StatusCode,
+                responseContent
+            );
+            return new PinMeToException(responseContent);
+        }
     }
 }

@@ -7,5 +7,5 @@ namespace TheCodePatch.PinMeTo.Client.Exceptions;
 /// </summary>
 public class DeserializationException : Exception
 {
-    public DeserializationException() : base("Failed to deserialize") { }
+    internal DeserializationException() : base("Failed to deserialize") { }
 }

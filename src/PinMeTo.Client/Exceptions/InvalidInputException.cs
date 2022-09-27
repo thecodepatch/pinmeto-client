@@ -7,8 +7,6 @@ namespace TheCodePatch.PinMeTo.Client.Exceptions;
 /// </summary>
 public class InvalidInputException : Exception
 {
-    public InvalidInputException(string parameterName, string description)
-        : base($"Validation failed for parameter {parameterName}: {description}")
-    {
-    }
+    internal InvalidInputException(string parameterName, string description)
+        : base($"Validation failed for parameter {parameterName}: {description}") { }
 }

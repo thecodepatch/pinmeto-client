@@ -5,6 +5,7 @@ using System.Threading.Channels;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Shouldly;
+using TheCodePatch.PinMeTo.Client.Exceptions;
 using TheCodePatch.PinMeTo.Client.Locations;
 using TheCodePatch.PinMeTo.Client.Locations.Model;
 using Xunit.Abstractions;
@@ -237,6 +238,22 @@ public class UpdateLocationTests : UnitTestBase
             pendingChangesValueSelector(detailsResult.Result.PendingChanges)
                 .ShouldBeEquivalentTo(modifiedValue);
         }
+
+        static void SetPropertyValue<T, TValue>(
+            T target,
+            Expression<Func<T, TValue>> memberLamda,
+            TValue value
+        )
+        {
+            if (memberLamda.Body is MemberExpression memberSelectorExpression)
+            {
+                var property = memberSelectorExpression.Member as PropertyInfo;
+                if (property != null)
+                {
+                    property.SetValue(target, value, null);
+                }
+            }
+        }
     }
 
     [Fact]
@@ -299,19 +316,15 @@ public class UpdateLocationTests : UnitTestBase
             .ShouldBeEquivalentTo(openingHours);
     }
 
-    private static void SetPropertyValue<T, TValue>(
-        T target,
-        Expression<Func<T, TValue>> memberLamda,
-        TValue value
-    )
+    [Fact]
+    public async Task NonExistentLocationThrowsException()
     {
-        if (memberLamda.Body is MemberExpression memberSelectorExpression)
-        {
-            var property = memberSelectorExpression.Member as PropertyInfo;
-            if (property != null)
-            {
-                property.SetValue(target, value, null);
-            }
-        }
+        await Assert.ThrowsAsync<NotFoundException>(
+            () =>
+                _locationsService.UpdateLocation(
+                    "NONEXISTENT-LOCATION",
+                    new() { Description = new() { Short = "test" } }
+                )
+        );
     }
 }
