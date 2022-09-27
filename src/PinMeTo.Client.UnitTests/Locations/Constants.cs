@@ -1,10 +1,15 @@
 ﻿using System.Collections.Generic;
 using TheCodePatch.PinMeTo.Client.Locations.Model;
 
+// ReSharper disable InconsistentNaming
+
 namespace TheCodePatch.PinMeTo.Client.UnitTests.Locations;
 
 internal static class Constants
 {
+    /// <summary>
+    /// A location that has only required values populated.
+    /// </summary>
     public static readonly CreateLocationInput MinimalLocation =
         new()
         {
@@ -18,6 +23,9 @@ internal static class Constants
             },
         };
 
+    /// <summary>
+    /// A location that has all values populated.
+    /// </summary>
     public static readonly CreateLocationInput CompleteLocation =
         new()
         {
