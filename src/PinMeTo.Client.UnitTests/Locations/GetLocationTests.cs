@@ -51,23 +51,25 @@ public class GetLocationTests : UnitTestBase
 
         // d.Name.ShouldBe(expected.Name);   Seems to fall back on client name
 
-        d.StoreId.ShouldBe(expected.StoreId);
-        d.Address.ShouldBeEquivalentTo(expected.Address);
-        d.SpecialOpeningHours.ShouldBeEquivalentTo(expected.SpecialOpeningHours);
-        d.Contact.ShouldBeEquivalentTo(expected.Contact);
-        d.Description.ShouldBeEquivalentTo(expected.Description);
-        d.LocationDescriptor.ShouldBe(expected.LocationDescriptor);
-        d.Position.ShouldBeEquivalentTo(expected.Position);
-        d.OpeningHours.ShouldBeEquivalentTo(expected.OpeningHours);
-        d.IsPermanentlyClosed.ShouldBe(expected.IsPermanentlyClosed ?? false);
-        d.IsTemporarilyClosedUntil.ShouldBe(expected.IsTemporarilyClosedUntil);
-        d.IsAlwaysOpen.ShouldBe(expected.IsAlwaysOpen ?? false);
-        d.WifiSsid.ShouldBe(expected.WifiSsid);
-        d.FacebookName.ShouldBe(
+        d.Result.StoreId.ShouldBe(expected.StoreId);
+        d.Result.Address.ShouldBeEquivalentTo(expected.Address);
+        d.Result.SpecialOpeningHours.ShouldBeEquivalentTo(expected.SpecialOpeningHours);
+        d.Result.Contact.ShouldBeEquivalentTo(expected.Contact);
+        d.Result.Description.ShouldBeEquivalentTo(expected.Description);
+        d.Result.LocationDescriptor.ShouldBe(expected.LocationDescriptor);
+        d.Result.Position.ShouldBeEquivalentTo(expected.Position);
+        d.Result.OpeningHours.ShouldBeEquivalentTo(expected.OpeningHours);
+        d.Result.IsPermanentlyClosed.ShouldBe(expected.IsPermanentlyClosed ?? false);
+        d.Result.IsTemporarilyClosedUntil.ShouldBe(expected.IsTemporarilyClosedUntil);
+        d.Result.IsAlwaysOpen.ShouldBe(expected.IsAlwaysOpen ?? false);
+        d.Result.WifiSsid.ShouldBe(expected.WifiSsid);
+        d.Result.FacebookName.ShouldBe(
             _options.IsFacebookCustomNameEnabled ? expected.FacebookName : null
         );
 
-        d.GoogleName.ShouldBe(_options.IsGoogleCustomNameEnabled ? expected.GoogleName : null);
+        d.Result.GoogleName.ShouldBe(
+            _options.IsGoogleCustomNameEnabled ? expected.GoogleName : null
+        );
     }
 
     [Theory]

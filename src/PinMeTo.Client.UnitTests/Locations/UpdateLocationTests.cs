@@ -209,7 +209,7 @@ public class UpdateLocationTests : UnitTestBase
         // Reset the data in the API and get the baseline data.
         var initial = await _locationsService.CreateOrUpdate(Constants.CompleteLocation);
 
-        var valueFromBaseline = detailsValuePropertySelector(initial);
+        var valueFromBaseline = detailsValuePropertySelector(initial.Result);
         var modifiedValue = valueModifier(valueFromBaseline);
 
         // Set the modified value to the update input data.
@@ -227,14 +227,14 @@ public class UpdateLocationTests : UnitTestBase
         if (null == pendingChangesValueSelector)
         {
             // Check that the return value from UpdateLocation has had the value updated.
-            detailsValuePropertySelector(updateResult).ShouldBeEquivalentTo(modifiedValue);
-            detailsValuePropertySelector(detailsResult).ShouldBeEquivalentTo(modifiedValue);
+            detailsValuePropertySelector(updateResult.Result).ShouldBeEquivalentTo(modifiedValue);
+            detailsValuePropertySelector(detailsResult.Result).ShouldBeEquivalentTo(modifiedValue);
         }
         else
         {
-            pendingChangesValueSelector(updateResult.PendingChanges)
+            pendingChangesValueSelector(updateResult.Result.PendingChanges)
                 .ShouldBeEquivalentTo(modifiedValue);
-            pendingChangesValueSelector(detailsResult.PendingChanges)
+            pendingChangesValueSelector(detailsResult.Result.PendingChanges)
                 .ShouldBeEquivalentTo(modifiedValue);
         }
     }
@@ -248,8 +248,8 @@ public class UpdateLocationTests : UnitTestBase
         };
         var details = await _locationsService.CreateOrUpdate(initial);
 
-        details.OpeningHours.Monday.State.ShouldBe(OpenState.NotSpecified);
-        details.OpeningHours.Monday.Times.ShouldBeEmpty();
+        details.Result.OpeningHours.Monday.State.ShouldBe(OpenState.NotSpecified);
+        details.Result.OpeningHours.Monday.Times.ShouldBeEmpty();
 
         var openingHours = new OpeningHours
         {
@@ -259,7 +259,7 @@ public class UpdateLocationTests : UnitTestBase
 
         // Set state to open and assign a time
         details = await _locationsService.UpdateLocation(
-            details.StoreId,
+            details.Result.StoreId,
             new()
             {
                 OpeningHours = new()
@@ -268,20 +268,22 @@ public class UpdateLocationTests : UnitTestBase
                 },
             }
         );
-        details.OpeningHours.Monday.State.ShouldBe(OpenState.Open);
-        details.OpeningHours.Monday.Times.ShouldHaveSingleItem().ShouldBeEquivalentTo(openingHours);
+        details.Result.OpeningHours.Monday.State.ShouldBe(OpenState.Open);
+        details.Result.OpeningHours.Monday.Times
+            .ShouldHaveSingleItem()
+            .ShouldBeEquivalentTo(openingHours);
 
         // Now set to closed
         details = await _locationsService.UpdateLocation(
-            details.StoreId,
+            details.Result.StoreId,
             new() { OpeningHours = new() { Monday = { State = OpenState.Closed } } }
         );
-        details.OpeningHours.Monday.State.ShouldBe(OpenState.Closed);
-        details.OpeningHours.Monday.Times.ShouldBeEmpty();
+        details.Result.OpeningHours.Monday.State.ShouldBe(OpenState.Closed);
+        details.Result.OpeningHours.Monday.Times.ShouldBeEmpty();
 
         // Now set to open again
         details = await _locationsService.UpdateLocation(
-            details.StoreId,
+            details.Result.StoreId,
             new()
             {
                 OpeningHours = new()
@@ -291,8 +293,10 @@ public class UpdateLocationTests : UnitTestBase
             }
         );
 
-        details.OpeningHours.ShouldNotBeNull().Monday.State.ShouldBe(OpenState.Open);
-        details.OpeningHours.Monday.Times.ShouldHaveSingleItem().ShouldBeEquivalentTo(openingHours);
+        details.Result.OpeningHours.ShouldNotBeNull().Monday.State.ShouldBe(OpenState.Open);
+        details.Result.OpeningHours.Monday.Times
+            .ShouldHaveSingleItem()
+            .ShouldBeEquivalentTo(openingHours);
     }
 
     private static void SetPropertyValue<T, TValue>(

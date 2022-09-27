@@ -21,7 +21,7 @@ public class ListLocationsTests : UnitTestBase
     public async Task CanList()
     {
         var response = await _locationsService.List(new PageNavigation(100));
-        response.Items.ShouldNotBeEmpty();
+        response.Result.Items.ShouldNotBeEmpty();
     }
 
     // TODO, This fails as we start navigating backwards. Is there anything wrong in the API?
@@ -29,7 +29,10 @@ public class ListLocationsTests : UnitTestBase
     public async Task CanNavigatePages()
     {
         var allSamplePagesResponse = await _locationsService.List(new(3));
-        allSamplePagesResponse.Items.Count.ShouldBe(3, "This test requires at least 3 locations.");
+        allSamplePagesResponse.Result.Items.Count.ShouldBe(
+            3,
+            "This test requires at least 3 locations."
+        );
 
         var page1Result = await _locationsService.List(new(1));
         AssertResult(page1Result, 1, false, true, out _, out var nextIsPage2Nav);
@@ -48,7 +51,7 @@ public class ListLocationsTests : UnitTestBase
         AssertResult(page1Result, 1, false, true, out _, out _);
 
         void AssertResult(
-            PagedResult<Location> result,
+            PinMeToResult<PagedResult<Location>> result,
             int pageNumber,
             bool expectPrev,
             bool? expectNext,
@@ -56,16 +59,18 @@ public class ListLocationsTests : UnitTestBase
             out PageNavigation? nextNav
         )
         {
-            var theItem = result.Items.ShouldHaveSingleItem(
+            var theItem = result.Result.Items.ShouldHaveSingleItem(
                 $"Page {pageNumber} did not have a single number"
             );
-            var matchingPageFromAllPagesResponse = allSamplePagesResponse.Items[pageNumber - 1];
+            var matchingPageFromAllPagesResponse = allSamplePagesResponse.Result.Items[
+                pageNumber - 1
+            ];
             theItem.StoreId.ShouldBe(
                 matchingPageFromAllPagesResponse.StoreId,
                 $"Page {pageNumber} is not the same item as the corresponding position in the all sample pages response."
             );
 
-            prevNav = result.PreviousPage;
+            prevNav = result.Result.PreviousPage;
             if (expectPrev)
             {
                 prevNav.ShouldNotBeNull(
@@ -79,7 +84,7 @@ public class ListLocationsTests : UnitTestBase
                 );
             }
 
-            nextNav = result.NextPage;
+            nextNav = result.Result.NextPage;
             if (expectNext.HasValue)
             {
                 if (expectNext.Value)
@@ -218,8 +223,8 @@ public class ListLocationsTests : UnitTestBase
         do
         {
             var result = await _locationsService.List(nextPage);
-            retval.AddRange(result.Items);
-            nextPage = result.NextPage;
+            retval.AddRange(result.Result.Items);
+            nextPage = result.Result.NextPage;
         } while (null != nextPage);
 
         return retval;
