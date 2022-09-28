@@ -10,7 +10,7 @@ A .NET client for PinMeTo
 ## Import NuGet package PinMeTo.Client
 `dotnet add package PinMeTo.Client`
 
-# Custom data
+## Custom data
 You need to implement a model of the _custom data_ configured in your PinMeTo account.
 This is a simple POCO object where the properties have the same name as your custom data properties,
 or are mapped using `System.Text.Json.Serialization.JsonPropertyNameAttribute` attributes.
