@@ -5,14 +5,16 @@ A .NET client for PinMeTo
 * Import NuGet package PinMeTo.Client
 * Implement a record representing the _custom data_ of your PinMeToAccount.
 * Add the client to your DI container by using one of the extension methods in the `TheCodePatch.PinMeTo.Client` namespace and apply the appropriate configuration.
-* Resolve the `ILocationsService<TYourCustomData>` and use it to interact with the API.
+* Resolve the `ILocationsService<TYourCustomData>` and use it to interact with the API. 
+ 
+Each step is explained in the sections below.
 
 ## Import NuGet package PinMeTo.Client
 `dotnet add package PinMeTo.Client`
 
 ## Custom data
 You need to implement a model of the _custom data_ configured in your PinMeTo account.
-This is a simple POCO object where the properties have the same name as your custom data properties,
+This is a simple POCO whose properties have the same name as your custom data properties,
 or are mapped using `System.Text.Json.Serialization.JsonPropertyNameAttribute` attributes.
 
 Example:
