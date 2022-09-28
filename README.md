@@ -3,10 +3,31 @@ A .NET client for PinMeTo
 
 # Usage
 * Import NuGet package PinMeTo.Client
-* Add the client to your DI container by using one of the extension methods in the `TheCodePatch.PinMeTo.Client` namespace (see sections below).
-* Resolve the `ILocationsService` and use it to interact with the API.
+* Implement a record representing the _custom data_ of your PinMeToAccount.
+* Add the client to your DI container by using one of the extension methods in the `TheCodePatch.PinMeTo.Client` namespace and apply the appropriate configuration.
+* Resolve the `ILocationsService<TYourCustomData>` and use it to interact with the API.
 
-## If you want your connection details in a config file
+## Import NuGet package PinMeTo.Client
+`dotnet add package PinMeTo.Client`
+
+# Custom data
+You need to implement a model of the _custom data_ configured in your PinMeTo account.
+This is a simple POCO object where the properties have the same name as your custom data properties,
+or are mapped using `System.Text.Json.Serialization.JsonPropertyNameAttribute` attributes.
+
+Example:
+```csharp
+public record MyCustomData
+{
+    [JsonPropertyName("premstore")]
+    public bool IsPremiumStore { get; set; }
+}
+```
+
+## Add the client to your DI container
+You add the client to your DI container using one of two extension methods in the `TheCodePatch.PinMeTo.Client` namespace.
+
+### If you want your connection details in a config file
 Add the following section to your configuration:
 ```json
 "PinMeToClient": {
@@ -18,13 +39,13 @@ Add the following section to your configuration:
 ```
 And use the following method on your IServiceCollection during DI container setup:
 ```csharp
-serviceCollection.AddPinMeToClient(conf.GetSection("PinMeToClient"))
+serviceCollection.AddPinMeToClient<MyCustomData>(conf.GetSection("PinMeToClient"))
 ```
 
-## If you want to configure the client in code
+### If you want to configure the client in code
 Use the following method on your IServiceCollection during DI container setup:
 ```csharp
-serviceCollection.AddPinMeToClient(
+serviceCollection.AddPinMeToClient<MyCustomData>(
     c =>
     {
         c.AccountId = "my account id";
@@ -34,6 +55,27 @@ serviceCollection.AddPinMeToClient(
     }
 )
 ```
+
+## Resolve the locations service
+
+Example:
+```csharp
+public class MyController: Controller
+{
+    private ILocationsService<MyCustomData> _locationsService;
+    
+    public MyController(ILocationsService<MyCustomData> locationsService)
+    {
+        _locationsService = locationsService;
+    }
+    
+    public Task<LocationDetails<MyCustomData>> GetLocation(string storeId)
+    {
+        return _locationsService.Get(storeId);
+    }
+}
+```
+
 
 # Contributing
 
