@@ -11,11 +11,17 @@ namespace TheCodePatch.PinMeTo.Client.Response;
 internal class ResponseHandler : IResponseHandler
 {
     private readonly ISerializer _serializer;
+    private readonly IExceptionFactory _exceptionFactory;
     private readonly ILogger<ResponseHandler> _logger;
 
-    public ResponseHandler(ISerializer serializer, ILogger<ResponseHandler> logger)
+    public ResponseHandler(
+        ISerializer serializer,
+        IExceptionFactory exceptionFactory,
+        ILogger<ResponseHandler> logger
+    )
     {
         _serializer = serializer;
+        _exceptionFactory = exceptionFactory;
         _logger = logger;
     }
 
@@ -26,7 +32,7 @@ internal class ResponseHandler : IResponseHandler
             return await HandleSuccess<TModel>(response);
         }
 
-        throw await ThrowFailureException(response);
+        throw await _exceptionFactory.CreateException(response);
     }
 
     private async Task<TModel> HandleSuccess<TModel>(HttpResponseMessage response)
@@ -38,88 +44,5 @@ internal class ResponseHandler : IResponseHandler
         );
         var deserialized = _serializer.Deserialize<TModel>(responseContent);
         return deserialized;
-    }
-
-    private async Task<Exception> ThrowFailureException(HttpResponseMessage response)
-    {
-        var responseContent = await response.Content.ReadAsStringAsync();
-        return response.StatusCode switch
-        {
-            HttpStatusCode.NotFound => NotFound(),
-            HttpStatusCode.BadRequest => BadRequest(),
-            HttpStatusCode.UnprocessableEntity => UnprocessableEntity(),
-            _ => Unexpected(),
-        };
-
-        Exception NotFound()
-        {
-            _logger.LogError("NotFound returned from API: {ResponseContent}", responseContent);
-            return new NotFoundException(responseContent);
-        }
-        Exception BadRequest()
-        {
-            var errorModel = _serializer.Deserialize<ErrorResponse>(responseContent);
-            if (errorModel.Error == "invalid_request")
-            {
-                _logger.LogError(
-                    "Invalid Request returned from API: {ResponseContent}",
-                    responseContent
-                );
-                return new InvalidPinMeToRequestException(errorModel.Description);
-            }
-
-            try
-            {
-                var validationErrors = _serializer.Deserialize<
-                    AtomicResponse<Dictionary<string, List<string>>>
-                >(responseContent);
-                // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-                if (null != validationErrors.Data)
-                {
-                    _logger.LogWarning(
-                        "Validation errors 1: {ValidationErrors}",
-                        _serializer.Serialize(validationErrors.Data)
-                    );
-                    return new ValidationErrorsException(validationErrors.Data);
-                }
-
-                var validationErrors2 = _serializer.Deserialize<Dictionary<string, List<string>>>(
-                    responseContent
-                );
-                // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-                if (null != validationErrors2)
-                {
-                    _logger.LogWarning(
-                        "Validation errors 2: {ValidationErrors}",
-                        _serializer.Serialize(validationErrors2)
-                    );
-                    return new ValidationErrorsException(validationErrors2);
-                }
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Failed to deserialize validation errors");
-            }
-
-            _logger.LogError(
-                "Unexpected BadRequest returned from API: {ResponseContent}",
-                responseContent
-            );
-            return new PinMeToException("Unexpected bad request");
-        }
-
-        Exception UnprocessableEntity()
-        {
-            return new MissingRequiredPropertyException(responseContent);
-        }
-        Exception Unexpected()
-        {
-            _logger.LogError(
-                "An unexpected error was retrieved from the API {StatusCode}: {ResponseContent}",
-                response.StatusCode,
-                responseContent
-            );
-            return new PinMeToException(responseContent);
-        }
     }
 }

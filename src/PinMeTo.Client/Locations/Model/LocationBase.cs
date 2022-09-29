@@ -15,7 +15,7 @@ public abstract record LocationBase<TCustomData>
     public Address Address { get; init; } = new();
 
     [JsonPropertyName("specialOpenHours")]
-    public List<SpecialOpeningHours>? SpecialOpeningHours { get; init; }
+    public List<SpecialOpeningHours> SpecialOpeningHours { get; init; } = new();
 
     [JsonPropertyName("contact")]
     [Required]
@@ -36,7 +36,7 @@ public abstract record LocationBase<TCustomData>
 
     [JsonPropertyName("location")]
     [Required]
-    public Position Position { get; init; } = new();
+    public Position? Position { get; set; }
 
     [JsonPropertyName("customData")]
     public TCustomData? CustomData { get; init; }

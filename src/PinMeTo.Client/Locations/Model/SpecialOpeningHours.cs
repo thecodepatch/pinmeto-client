@@ -1,14 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 
 namespace TheCodePatch.PinMeTo.Client.Locations.Model;
 
 public record SpecialOpeningHours
 {
-    [JsonPropertyName("closeTime")] // TODO or endTime?
+    [JsonPropertyName("closeTime")]
     [Required]
-    public TimeOnly CloseTime { get; init; }
+    public TimeOnly? CloseTime { get; set; }
 
     [JsonPropertyName("end")]
     [Required]
@@ -16,6 +17,8 @@ public record SpecialOpeningHours
 
     [JsonPropertyName("isClosed")]
     [Required]
+    [MemberNotNullWhen(false, nameof(CloseTime))]
+    [MemberNotNullWhen(false, nameof(OpenTime))]
     public bool IsClosed { get; init; }
 
     [JsonPropertyName("label")]
@@ -24,7 +27,7 @@ public record SpecialOpeningHours
 
     [JsonPropertyName("openTime")]
     [Required]
-    public TimeOnly OpenTime { get; init; }
+    public TimeOnly? OpenTime { get; set; }
 
     [JsonPropertyName("start")]
     [Required]

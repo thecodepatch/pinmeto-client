@@ -38,35 +38,44 @@ internal class LocationsService<TCustomData> : ILocationsService<TCustomData>
         Guard.IsNotNullOrWhiteSpace(nameof(storeId), storeId);
         var url = _urlFactory.CreateRelativeUrl($"locations/{storeId}");
         var response = await _client.GetAsync(url);
-        var result = await _responseHandler.DeserializeOrThrow<AtomicResponse<LocationDetails<TCustomData>>>(
-            response
-        );
+        var result = await _responseHandler.DeserializeOrThrow<
+            AtomicResponse<LocationDetails<TCustomData>>
+        >(response);
+        CleanLocation(result.Data);
         return WrapInResult(response, result.Data);
     }
 
-    public async Task<PinMeToResult<LocationDetails<TCustomData>>> Create(CreateLocationInput<TCustomData> input)
+    public async Task<PinMeToResult<LocationDetails<TCustomData>>> Create(
+        CreateLocationInput<TCustomData> input
+    )
     {
         var url = _urlFactory.CreateRelativeUrl("locations");
         var content = _serializer.MakeJson(input);
         var response = await _client.PostAsync(url, content);
-        var result = await _responseHandler.DeserializeOrThrow<AtomicResponse<LocationDetails<TCustomData>>>(
-            response
-        );
+        var result = await _responseHandler.DeserializeOrThrow<
+            AtomicResponse<LocationDetails<TCustomData>>
+        >(response);
+        CleanLocation(result.Data);
         return WrapInResult(response, result.Data);
     }
 
-    public async Task<PinMeToResult<LocationDetails<TCustomData>>> CreateOrUpdate(CreateLocationInput<TCustomData> input)
+    public async Task<PinMeToResult<LocationDetails<TCustomData>>> CreateOrUpdate(
+        CreateLocationInput<TCustomData> input
+    )
     {
         var url = _urlFactory.CreateRelativeUrl("locations", ("upsert", "true"));
         var content = _serializer.MakeJson(input);
         var response = await _client.PostAsync(url, content);
-        var result = await _responseHandler.DeserializeOrThrow<AtomicResponse<LocationDetails<TCustomData>>>(
-            response
-        );
+        var result = await _responseHandler.DeserializeOrThrow<
+            AtomicResponse<LocationDetails<TCustomData>>
+        >(response);
+        CleanLocation(result.Data);
         return WrapInResult(response, result.Data);
     }
 
-    public async Task<PinMeToResult<PagedResult<Location<TCustomData>>>> List(PageNavigation pageNavigation)
+    public async Task<PinMeToResult<PagedResult<Location<TCustomData>>>> List(
+        PageNavigation pageNavigation
+    )
     {
         Guard.IsWithinRange(nameof(pageNavigation.PageSize), pageNavigation.PageSize, 0, 250);
 
@@ -90,9 +99,14 @@ internal class LocationsService<TCustomData> : ILocationsService<TCustomData>
         var url = _urlFactory.CreateRelativeUrl("locations", urlParameters.ToArray());
 
         var response = await _client.GetAsync(url);
-        var locations = await _responseHandler.DeserializeOrThrow<PagedResponse<Location<TCustomData>>>(
-            response
-        );
+        var locations = await _responseHandler.DeserializeOrThrow<
+            PagedResponse<Location<TCustomData>>
+        >(response);
+
+        foreach (var location in locations.Data)
+        {
+            CleanLocation(location);
+        }
 
         return WrapInResult(response, new PagedResult<Location<TCustomData>>(locations));
     }
@@ -105,12 +119,21 @@ internal class LocationsService<TCustomData> : ILocationsService<TCustomData>
         var url = _urlFactory.CreateRelativeUrl($"locations/{storeId}");
         var content = _serializer.MakeJson(input);
         var response = await _client.PutAsync(url, content);
-        var result = await _responseHandler.DeserializeOrThrow<AtomicResponse<LocationDetails<TCustomData>>>(
-            response
-        );
+        var result = await _responseHandler.DeserializeOrThrow<
+            AtomicResponse<LocationDetails<TCustomData>>
+        >(response);
+        CleanLocation(result.Data);
         return WrapInResult(response, result.Data);
     }
 
+    /// <summary>
+    /// Wraps the specified response in a <see><cref>PinMeToResult</cref></see> that contains information
+    /// about the rate limit.
+    /// </summary>
+    /// <param name="response">The response that contained the result.</param>
+    /// <param name="data">The result data.</param>
+    /// <typeparam name="T">The type of the result data.</typeparam>
+    /// <returns>An object with the rate limit information and the result data.</returns>
     private PinMeToResult<T> WrapInResult<T>(HttpResponseMessage response, T data)
     {
         var limit = ReadHeader("limit");
@@ -133,6 +156,34 @@ internal class LocationsService<TCustomData> : ILocationsService<TCustomData>
                   ? v
                   : null
               : null;
+        }
+    }
+
+    /// <summary>
+    /// Removes unnecessary data from the model that was deserialized by the API.
+    ///
+    /// Replaces position with 0 coordinates with null.
+    /// Removes "0000" opening- and closing times from special opening hours that are always closed and sets
+    /// them to null instead.
+    /// </summary>
+    /// <remarks>
+    /// This method modifies the passed object!
+    /// </remarks>
+    /// <param name="location">The location object to clean.</param>
+    private static void CleanLocation(LocationBase<TCustomData> location)
+    {
+        if (location.Position is { Latitude: 0, Longitude: 0 })
+        {
+            location.Position = null;
+        }
+
+        foreach (var soh in location.SpecialOpeningHours)
+        {
+            if (soh.IsClosed)
+            {
+                soh.OpenTime = null;
+                soh.CloseTime = null;
+            }
         }
     }
 }

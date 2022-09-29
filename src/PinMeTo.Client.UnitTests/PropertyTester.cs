@@ -120,6 +120,39 @@ internal class PropertyTester<TItems>
         return this;
     }
 
+    public PropertyTester<TItems> SomeShouldBeNull<TValue>(
+        Expression<Func<TItems, TValue?>> selector,
+        Action<PropertyTester<TValue>>? inner = null
+    )
+    {
+        var (selectFunction, propertyName) = GetSelectFunction(selector);
+
+        if (false == _items.Any(x => selectFunction(x) == null))
+        {
+            _errors.Add($"Found no {_path}{propertyName} values that were null");
+        }
+
+        if (null != inner)
+        {
+            var allNonNullValues = _items
+                .Select(x => selectFunction(x))
+                .Where(x => null != x)
+                .ToList();
+            if (allNonNullValues.Any())
+            {
+                var innerTester = GetNestedTester(allNonNullValues, propertyName);
+                inner.Invoke(innerTester!);
+                _errors.AddRange(innerTester._errors);
+            }
+            else
+            {
+                _errors.Add($"Found no {_path}{propertyName} values that were not null");
+            }
+        }
+
+        return this;
+    }
+
     public PropertyTester<TItems> NoneShouldBeNull<TValue>(
         Expression<Func<TItems, TValue>> selector,
         Action<PropertyTester<TValue>>? inner = null
