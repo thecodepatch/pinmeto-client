@@ -142,7 +142,11 @@ internal class LocationsService<TCustomData> : ILocationsService<TCustomData>
 
         var rateLimit =
             limit.HasValue && reset.HasValue && remaining.HasValue
-                ? new RateLimit(limit.Value, reset.Value, remaining.Value)
+                ? new RateLimit(
+                      limit.Value,
+                      ConvertUnixTimeStampToDateTime(reset.Value),
+                      remaining.Value
+                  )
                 : null;
 
         _logger.LogDebug("Rate limit: {@RateLimit}", rateLimit);
@@ -156,6 +160,14 @@ internal class LocationsService<TCustomData> : ILocationsService<TCustomData>
                   ? v
                   : null
               : null;
+        }
+
+        static DateTime ConvertUnixTimeStampToDateTime(double unixTimeStamp)
+        {
+            // Unix timestamp is seconds past epoch
+            return new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc)
+                .AddSeconds(unixTimeStamp)
+                .ToLocalTime();
         }
     }
 

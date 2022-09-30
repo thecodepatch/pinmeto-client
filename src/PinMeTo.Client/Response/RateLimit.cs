@@ -4,6 +4,6 @@
 /// Represents the rate limit.
 /// </summary>
 /// <param name="Limit">The hourly limit of requests.</param>
-/// <param name="Reset">TODO - what does this mean?</param>
+/// <param name="WillBeReset">When the limit will be reset.</param>
 /// <param name="Remaining">The remaining quota.</param>
-public record RateLimit(int Limit, int? Reset, int Remaining);
+public record RateLimit(int Limit, DateTime WillBeReset, int Remaining);
