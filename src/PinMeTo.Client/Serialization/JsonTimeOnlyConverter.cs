@@ -9,6 +9,10 @@ internal class JsonTimeOnlyConverter
 {
     private static TimeOnly Parse(string s)
     {
+        if (s == "2400")
+        {
+            return TimeOnly.MaxValue;
+        }
         return TimeOnly.ParseExact(s, "HHmm", CultureInfo.InvariantCulture);
     }
 
