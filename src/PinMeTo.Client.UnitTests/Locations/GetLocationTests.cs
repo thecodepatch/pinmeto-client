@@ -52,12 +52,20 @@ public class GetLocationTests : UnitTestBase
         // d.Name.ShouldBe(expected.Name);   Seems to fall back on client name
 
         d.Result.StoreId.ShouldBe(expected.StoreId);
-        d.Result.Address.ShouldBeEquivalentTo(expected.Address);
+
+        d.Result.Address.City.ShouldNotBeNullOrWhiteSpace();
+        d.Result.Address.Country.ShouldNotBeNullOrWhiteSpace();
+        d.Result.Address.State.ShouldNotBeNullOrWhiteSpace();
+        d.Result.Address.Street.ShouldNotBeNullOrWhiteSpace();
+        d.Result.Address.Zip.ShouldNotBeNullOrWhiteSpace();
+
+        d.Result.Position.ShouldNotBeNull().Latitude.ShouldNotBe(default);
+        d.Result.Position.ShouldNotBeNull().Longitude.ShouldNotBe(default);
+
         d.Result.SpecialOpeningHours.ShouldBeEquivalentTo(expected.SpecialOpeningHours);
         d.Result.Contact.ShouldBeEquivalentTo(expected.Contact);
         d.Result.Description.ShouldBeEquivalentTo(expected.Description);
         d.Result.LocationDescriptor.ShouldBe(expected.LocationDescriptor);
-        d.Result.Position.ShouldBeEquivalentTo(expected.Position);
         d.Result.OpeningHours.ShouldBeEquivalentTo(expected.OpeningHours);
         d.Result.IsPermanentlyClosed.ShouldBe(expected.IsPermanentlyClosed ?? false);
         d.Result.IsTemporarilyClosedUntil.ShouldBe(expected.IsTemporarilyClosedUntil);

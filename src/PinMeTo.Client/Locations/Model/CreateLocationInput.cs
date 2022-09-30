@@ -6,6 +6,12 @@ namespace TheCodePatch.PinMeTo.Client.Locations.Model;
 
 public record CreateLocationInput<TCustomData> : LocationBase<TCustomData>
 {
+    public CreateLocationInput()
+    {
+        // Position must not be null when submitting to the API.
+        this.Position = new();
+    }
+
     [JsonPropertyName("permanentlyClosed")]
     public bool? IsPermanentlyClosed { get; set; }
 

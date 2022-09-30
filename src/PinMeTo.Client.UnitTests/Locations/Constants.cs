@@ -32,7 +32,7 @@ internal static class Constants
             StoreId = "UNIT-TEST-STORE-NOT-REAL",
             Address =
             {
-                City = "Some city",
+                City = "Some city_MOD",
                 Country = "Sweden",
                 State = "Some state",
                 Street = "Some street",

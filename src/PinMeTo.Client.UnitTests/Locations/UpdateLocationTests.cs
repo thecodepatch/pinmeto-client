@@ -62,25 +62,6 @@ public class UpdateLocationTests : UnitTestBase
     }
 
     [Fact]
-    public async Task CanUpdateAddress()
-    {
-        await TestSinglePropertyUpdate(
-            details => details.Address,
-            a =>
-                new Address
-                {
-                    City = a?.City + "_MOD",
-                    Country = "United Kingdom", // Must be a valid country
-                    State = a?.State + "_MOD",
-                    Street = a?.Street + "_MOD",
-                    Zip = a?.Zip + "_MOD",
-                },
-            input => input.Address,
-            pendingChanges => pendingChanges.Address
-        );
-    }
-
-    [Fact]
     public async Task CanUpdateIsPermanentlyClosed()
     {
         await TestSinglePropertyUpdate(
@@ -107,17 +88,6 @@ public class UpdateLocationTests : UnitTestBase
             details => details.IsAlwaysOpen,
             oldValue => !oldValue,
             input => input.IsAlwaysOpen
-        );
-    }
-
-    [Fact]
-    public async Task CanUpdatePosition()
-    {
-        await TestSinglePropertyUpdate(
-            details => details.Position,
-            _ => new() { Latitude = 69.0600002, Longitude = 20.5490133 },
-            input => input.Position,
-            pendingChanges => pendingChanges.Position
         );
     }
 
