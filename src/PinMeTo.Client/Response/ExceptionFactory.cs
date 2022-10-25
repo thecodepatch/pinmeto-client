@@ -47,7 +47,7 @@ internal class ExceptionFactory : IExceptionFactory
 
     private Exception NotFound(string responseContent)
     {
-        _logger.LogError("NotFound returned from API: {ResponseContent}", responseContent);
+        _logger.LogDebug("NotFound returned from API: {ResponseContent}", responseContent);
         return new NotFoundException(responseContent);
     }
 
