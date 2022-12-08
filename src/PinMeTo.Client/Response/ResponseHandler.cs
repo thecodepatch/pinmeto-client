@@ -25,14 +25,33 @@ internal class ResponseHandler : IResponseHandler
         _logger = logger;
     }
 
-    public async Task<TModel> DeserializeOrThrow<TModel>(HttpResponseMessage response)
+    /// <inheritdoc />
+    public async Task<TModel> DeserializeOrThrow<TModel>(
+        string url,
+        object? requestContent,
+        HttpResponseMessage response
+    )
     {
         if (response.IsSuccessStatusCode)
         {
             return await HandleSuccess<TModel>(response);
         }
 
-        throw await _exceptionFactory.CreateException(response);
+        var responseContent = await response.Content.ReadAsStringAsync();
+        var exception = _exceptionFactory.CreateException(response.StatusCode, responseContent);
+        if (exception is PinMeToException)
+        {
+            _logger.LogError(
+                "Unexpected error with status code {StatusCode} on {Method} request to {Url}:{@RequestContent} Response: {ResponseContent}",
+                response.StatusCode,
+                response.RequestMessage?.Method,
+                response.RequestMessage?.RequestUri,
+                requestContent,
+                responseContent
+            );
+        }
+
+        throw exception;
     }
 
     private async Task<TModel> HandleSuccess<TModel>(HttpResponseMessage response)

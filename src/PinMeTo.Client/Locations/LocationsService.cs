@@ -40,7 +40,7 @@ internal class LocationsService<TCustomData> : ILocationsService<TCustomData>
         var response = await _client.GetAsync(url);
         var result = await _responseHandler.DeserializeOrThrow<
             AtomicResponse<LocationDetails<TCustomData>>
-        >(response);
+        >(url, null, response);
         CleanLocation(result.Data);
         return WrapInResult(response, result.Data);
     }
@@ -54,7 +54,7 @@ internal class LocationsService<TCustomData> : ILocationsService<TCustomData>
         var response = await _client.PostAsync(url, content);
         var result = await _responseHandler.DeserializeOrThrow<
             AtomicResponse<LocationDetails<TCustomData>>
-        >(response);
+        >(url, content, response);
         CleanLocation(result.Data);
         return WrapInResult(response, result.Data);
     }
@@ -68,7 +68,7 @@ internal class LocationsService<TCustomData> : ILocationsService<TCustomData>
         var response = await _client.PostAsync(url, content);
         var result = await _responseHandler.DeserializeOrThrow<
             AtomicResponse<LocationDetails<TCustomData>>
-        >(response);
+        >(url, content, response);
         CleanLocation(result.Data);
         return WrapInResult(response, result.Data);
     }
@@ -101,7 +101,7 @@ internal class LocationsService<TCustomData> : ILocationsService<TCustomData>
         var response = await _client.GetAsync(url);
         var locations = await _responseHandler.DeserializeOrThrow<
             PagedResponse<Location<TCustomData>>
-        >(response);
+        >(url, null, response);
 
         foreach (var location in locations.Data)
         {
@@ -121,7 +121,7 @@ internal class LocationsService<TCustomData> : ILocationsService<TCustomData>
         var response = await _client.PutAsync(url, content);
         var result = await _responseHandler.DeserializeOrThrow<
             AtomicResponse<LocationDetails<TCustomData>>
-        >(response);
+        >(url, content, response);
         CleanLocation(result.Data);
         return WrapInResult(response, result.Data);
     }

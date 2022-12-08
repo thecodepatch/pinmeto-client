@@ -18,10 +18,9 @@ internal class ExceptionFactory : IExceptionFactory
         _logger = logger;
     }
 
-    public async Task<Exception> CreateException(HttpResponseMessage faultedResponse)
+    public Exception CreateException(HttpStatusCode statusCode, string responseContent)
     {
-        var responseContent = await faultedResponse.Content.ReadAsStringAsync();
-        var appropriateException = faultedResponse.StatusCode switch
+        var appropriateException = statusCode switch
         {
             HttpStatusCode.NotFound => NotFound(responseContent),
             HttpStatusCode.BadRequest => BadRequest(responseContent),
@@ -33,14 +32,6 @@ internal class ExceptionFactory : IExceptionFactory
         {
             return appropriateException;
         }
-
-        _logger.LogError(
-            "Unexpected error with status code {StatusCode} on {Method} request to {Url}: {ResponseContent}",
-            faultedResponse.StatusCode,
-            faultedResponse.RequestMessage?.Method,
-            faultedResponse.RequestMessage?.RequestUri,
-            responseContent
-        );
 
         return new PinMeToException("Unexpected bad request");
     }

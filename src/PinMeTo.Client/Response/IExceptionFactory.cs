@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Net;
 
 namespace TheCodePatch.PinMeTo.Client.Response;
 
@@ -10,7 +11,8 @@ internal interface IExceptionFactory
     /// <summary>
     /// Creates an appropriate exception to throw, based on the state of the specified faulted response.
     /// </summary>
-    /// <param name="faultedResponse">A response that has information about some kind of error.</param>
+    /// <param name="statusCode">The status code of the response.</param>
+    /// <param name="responseContent">The content of the response</param>
     /// <returns>The appropriate exception.</returns>
-    Task<Exception> CreateException(HttpResponseMessage faultedResponse);
+    Exception CreateException(HttpStatusCode statusCode, string responseContent);
 }

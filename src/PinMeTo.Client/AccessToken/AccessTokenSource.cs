@@ -75,8 +75,13 @@ internal class AccessTokenSource : IAccessTokenSource
         var client = _httpClientFactory.CreateClient(
             AuthenticatedHttpClientConfigurator.HttpClientName
         );
-        var response = await client.PostAsync("/oauth/token", new FormUrlEncodedContent(message));
-        var result = await _responseHandler.DeserializeOrThrow<ResponseModel>(response);
+        const string url = "/oauth/token";
+        var response = await client.PostAsync(url, new FormUrlEncodedContent(message));
+        var result = await _responseHandler.DeserializeOrThrow<ResponseModel>(
+            url,
+            message,
+            response
+        );
         return result;
     }
 
