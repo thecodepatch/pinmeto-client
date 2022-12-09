@@ -81,8 +81,6 @@ public class MyController: Controller
 
 # Contributing
 
-Please use [CSharpier](https://csharpier.com/) with Run on save activated to keep formatting consistent.
-
 To run unit tests, you need to have an `appsettings.private.json` file in the unit test project. 
 Copy the already existing file `appsettings.private.json.example` and remove the `.example` suffix. 
 Then enter the connection details for your PinMeTo account (note! don't use a production account, as 
