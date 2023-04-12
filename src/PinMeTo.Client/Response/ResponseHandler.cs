@@ -42,7 +42,7 @@ internal class ResponseHandler : IResponseHandler
         if (exception is PinMeToException)
         {
             _logger.LogError(
-                "Unexpected error with status code {StatusCode} on {Method} request to {Url}:{@RequestContent} Response: {ResponseContent}",
+                "Unexpected error with status code {StatusCode} on {Method} request to {Url} with request content {@RequestContent} Response: {ResponseContent}",
                 response.StatusCode,
                 response.RequestMessage?.Method,
                 response.RequestMessage?.RequestUri,
