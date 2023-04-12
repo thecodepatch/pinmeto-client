@@ -13,25 +13,25 @@ internal class AccessTokenSource : IAccessTokenSource
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<AccessTokenSource> _logger;
-    private readonly IOptionsMonitor<PinMeToClientOptions> _options;
+    private readonly CurrentOptionsProvider _optionsProvider;
     private readonly IResponseHandler _responseHandler;
     private AccessToken? _currentToken;
 
     public AccessTokenSource(
         IHttpClientFactory httpClientFactory,
-        IOptionsMonitor<PinMeToClientOptions> options,
+        CurrentOptionsProvider optionsProvider,
         IResponseHandler responseHandler,
         ILogger<AccessTokenSource> logger
     )
     {
         _httpClientFactory = httpClientFactory;
-        _options = options;
+        _optionsProvider = optionsProvider;
         _responseHandler = responseHandler;
         _logger = logger;
     }
 
     /// <inheritdoc />
-    public async Task<string> GetAccessToken()
+    public async Task<string> GetAccessToken<TCustomData>()
     {
         if (_currentToken?.GetRemainingValiditySeconds() > 10)
         {
@@ -44,13 +44,13 @@ internal class AccessTokenSource : IAccessTokenSource
             null == _currentToken ? "not found" : "expired"
         );
 
-        await RefreshToken();
-        return await GetAccessToken();
+        await RefreshToken<TCustomData>();
+        return await GetAccessToken<TCustomData>();
     }
 
-    private async Task RefreshToken()
+    private async Task RefreshToken<TCustomData>()
     {
-        var deserialized = await RetrieveTokenFromApi();
+        var deserialized = await RetrieveTokenFromApi<TCustomData>();
 
         _logger.LogDebug(
             "New access token will be used for {ValidityDuration} seconds",
@@ -64,16 +64,17 @@ internal class AccessTokenSource : IAccessTokenSource
         };
     }
 
-    private async Task<ResponseModel> RetrieveTokenFromApi()
+    private async Task<ResponseModel> RetrieveTokenFromApi<TCustomData>()
     {
+        var options = _optionsProvider.GetCurrentOptions<TCustomData>();
         var message = new Dictionary<string, string>
         {
-            { "client_id", _options.CurrentValue.AppId },
-            { "client_secret", _options.CurrentValue.AppSecret },
+            { "client_id", options.AppId },
+            { "client_secret", options.AppSecret },
             { "grant_type", "client_credentials" },
         };
         var client = _httpClientFactory.CreateClient(
-            AuthenticatedHttpClientConfigurator.HttpClientName
+            AuthenticatedHttpClientConfigurator.GetAuthenticatedHttpClientName<TCustomData>()
         );
         const string url = "/oauth/token";
         var response = await client.PostAsync(url, new FormUrlEncodedContent(message));

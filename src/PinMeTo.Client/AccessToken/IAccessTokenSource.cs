@@ -11,5 +11,5 @@ internal interface IAccessTokenSource
     ///     Gets an access token that should be used when communicating with the PinMeTo API.
     /// </summary>
     /// <returns>The access token.</returns>
-    Task<string> GetAccessToken();
+    Task<string> GetAccessToken<TCustomData>();
 }

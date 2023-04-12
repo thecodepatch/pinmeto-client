@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using TheCodePatch.PinMeTo.Client.AccessToken;
 using TheCodePatch.PinMeTo.Client.Clients;
@@ -27,7 +28,7 @@ public static class Bootstrapping
     {
         return services
             .AddPinMeToClientInternal<TCustomData>()
-            .AddOptions<PinMeToClientOptions>()
+            .AddPinMeToOptions<TCustomData>()
             .Configure(configure)
             .ValidateDataAnnotations()
             .Services;
@@ -49,27 +50,36 @@ public static class Bootstrapping
     {
         return services
             .AddPinMeToClientInternal<TCustomData>()
-            .AddOptions<PinMeToClientOptions>()
+            .AddPinMeToOptions<TCustomData>()
             .Bind(configurationSection)
             .ValidateDataAnnotations()
             .Services;
+    }
+
+    private static OptionsBuilder<PinMeToClientOptions> AddPinMeToOptions<TCustomData>(
+        this IServiceCollection services
+    )
+    {
+        var optionsName = CurrentOptionsProvider.CreateOptionsName<TCustomData>();
+        return services.AddOptions<PinMeToClientOptions>(optionsName);
     }
 
     private static IServiceCollection AddPinMeToClientInternal<TCustomData>(
         this IServiceCollection services
     )
     {
-        var httpClientName = $"PinMeToAuthorizedHttpClient-{typeof(TCustomData).FullName}";
+        services.TryAddSingleton<CurrentOptionsProvider>();
+        services.TryAddSingleton<ISerializer, Serializer>();
+        services.TryAddSingleton<IUrlFactory, UrlFactory>();
+        services.TryAddSingleton<IExceptionFactory, ExceptionFactory>();
+        services.TryAddSingleton<IResponseHandler, ResponseHandler>();
+
         return services
-            .AddSingleton<ISerializer, Serializer>()
-            .AddSingleton<IUrlFactory, UrlFactory>()
-            .AddSingleton<IExceptionFactory, ExceptionFactory>()
-            .AddSingleton<IResponseHandler, ResponseHandler>()
             // Add the http client authenticated to communicate with the PinMeTo API.
-            .AddAndConfigureAuthenticatedHttpClient()
+            .AddAndConfigureAuthenticatedHttpClient<TCustomData>()
             .AddSingleton<IAccessTokenSource, AccessTokenSource>()
             // Add the http client authorized to use resources provided by the PinMeTo API.
-            .AddAndConfigureAuthorizedHttpClient(httpClientName)
+            .AddAndConfigureAuthorizedHttpClient<TCustomData>(out var httpClientName)
             // Add the service providing access to the Locations resources in the API.
             .AddHttpClient<ILocationsService<TCustomData>, LocationsService<TCustomData>>(
                 httpClientName

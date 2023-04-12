@@ -36,7 +36,7 @@ internal class LocationsService<TCustomData> : ILocationsService<TCustomData>
     public async Task<PinMeToResult<LocationDetails<TCustomData>>> Get(string storeId)
     {
         Guard.IsNotNullOrWhiteSpace(nameof(storeId), storeId);
-        var url = _urlFactory.CreateRelativeUrl($"locations/{storeId}");
+        var url = _urlFactory.CreateRelativeUrl<TCustomData>($"locations/{storeId}");
         var response = await _client.GetAsync(url);
         var result = await _responseHandler.DeserializeOrThrow<
             AtomicResponse<LocationDetails<TCustomData>>
@@ -49,7 +49,7 @@ internal class LocationsService<TCustomData> : ILocationsService<TCustomData>
         CreateLocationInput<TCustomData> input
     )
     {
-        var url = _urlFactory.CreateRelativeUrl("locations");
+        var url = _urlFactory.CreateRelativeUrl<TCustomData>("locations");
         var content = _serializer.MakeJson(input);
         var response = await _client.PostAsync(url, content);
         var result = await _responseHandler.DeserializeOrThrow<
@@ -63,7 +63,7 @@ internal class LocationsService<TCustomData> : ILocationsService<TCustomData>
         CreateLocationInput<TCustomData> input
     )
     {
-        var url = _urlFactory.CreateRelativeUrl("locations", ("upsert", "true"));
+        var url = _urlFactory.CreateRelativeUrl<TCustomData>("locations", ("upsert", "true"));
         var content = _serializer.MakeJson(input);
         var response = await _client.PostAsync(url, content);
         var result = await _responseHandler.DeserializeOrThrow<
@@ -96,7 +96,7 @@ internal class LocationsService<TCustomData> : ILocationsService<TCustomData>
             urlParameters.Add(new(direction, pageNavigation.Key));
         }
 
-        var url = _urlFactory.CreateRelativeUrl("locations", urlParameters.ToArray());
+        var url = _urlFactory.CreateRelativeUrl<TCustomData>("locations", urlParameters.ToArray());
 
         var response = await _client.GetAsync(url);
         var locations = await _responseHandler.DeserializeOrThrow<
@@ -116,7 +116,7 @@ internal class LocationsService<TCustomData> : ILocationsService<TCustomData>
         UpdateLocationInput<TCustomData> input
     )
     {
-        var url = _urlFactory.CreateRelativeUrl($"locations/{storeId}");
+        var url = _urlFactory.CreateRelativeUrl<TCustomData>($"locations/{storeId}");
         var content = _serializer.MakeJson(input);
         var response = await _client.PutAsync(url, content);
         var result = await _responseHandler.DeserializeOrThrow<
@@ -143,10 +143,10 @@ internal class LocationsService<TCustomData> : ILocationsService<TCustomData>
         var rateLimit =
             limit.HasValue && reset.HasValue && remaining.HasValue
                 ? new RateLimit(
-                      limit.Value,
-                      ConvertUnixTimeStampToDateTime(reset.Value),
-                      remaining.Value
-                  )
+                    limit.Value,
+                    ConvertUnixTimeStampToDateTime(reset.Value),
+                    remaining.Value
+                )
                 : null;
 
         _logger.LogDebug("Rate limit: {@RateLimit}", rateLimit);
@@ -156,10 +156,10 @@ internal class LocationsService<TCustomData> : ILocationsService<TCustomData>
         int? ReadHeader(string name)
         {
             return response.Headers.TryGetValues($"x-ratelimit-{name}", out var values)
-              ? int.TryParse(values.FirstOrDefault(), out var v)
-                  ? v
-                  : null
-              : null;
+                ? int.TryParse(values.FirstOrDefault(), out var v)
+                    ? v
+                    : null
+                : null;
         }
 
         static DateTime ConvertUnixTimeStampToDateTime(double unixTimeStamp)

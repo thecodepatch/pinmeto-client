@@ -5,19 +5,20 @@ namespace TheCodePatch.PinMeTo.Client.Clients;
 
 internal class UrlFactory : IUrlFactory
 {
-    private readonly IOptionsMonitor<PinMeToClientOptions> _options;
+    private readonly CurrentOptionsProvider _currentOptionsProvider;
 
-    public UrlFactory(IOptionsMonitor<PinMeToClientOptions> options)
+    public UrlFactory(CurrentOptionsProvider currentOptionsProvider)
     {
-        _options = options;
+        _currentOptionsProvider = currentOptionsProvider;
     }
 
-    public string CreateRelativeUrl(
+    public string CreateRelativeUrl<TCustomData>(
         string relativePath,
         params (string name, string value)[] queryParameters
     )
     {
-        var accountIdEsc = Uri.EscapeDataString(_options.CurrentValue.AccountId);
+        var accountId = _currentOptionsProvider.GetCurrentOptions<TCustomData>().AccountId;
+        var accountIdEsc = Uri.EscapeDataString(accountId);
         var url = $"/v2/{accountIdEsc}/{relativePath.TrimStart('/')}";
 
         if (queryParameters.Length > 0)

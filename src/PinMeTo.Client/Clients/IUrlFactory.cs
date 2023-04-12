@@ -11,7 +11,7 @@ internal interface IUrlFactory
     /// <param name="relativePath">The relative path to the resource.</param>
     /// <param name="queryParameters">Any query parameters</param>
     /// <returns>The full, relative url.</returns>
-    string CreateRelativeUrl(
+    string CreateRelativeUrl<TCustomData>(
         string relativePath,
         params (string name, string value)[] queryParameters
     );

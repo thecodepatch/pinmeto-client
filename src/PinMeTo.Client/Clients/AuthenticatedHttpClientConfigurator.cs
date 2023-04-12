@@ -15,17 +15,15 @@ namespace TheCodePatch.PinMeTo.Client.Clients;
 /// </summary>
 internal static class AuthenticatedHttpClientConfigurator
 {
-    /// <summary>
-    /// The name of the named client configured as an authenticated client.
-    /// </summary>
-    internal const string HttpClientName = "AccessTokenClient";
+    public static string GetAuthenticatedHttpClientName<TCustomData>() =>
+        $"PinMeToAccessTokenClient-{typeof(TCustomData).FullName}";
 
     /// <summary>
     /// Adds the authenticated HTTP client to the DI container.
     /// </summary>
     /// <param name="services">The service collection.</param>
     /// <returns>The service collection with the authenticated HTTP client added.</returns>
-    public static IServiceCollection AddAndConfigureAuthenticatedHttpClient(
+    public static IServiceCollection AddAndConfigureAuthenticatedHttpClient<TCustomData>(
         this IServiceCollection services
     )
     {
@@ -33,17 +31,18 @@ internal static class AuthenticatedHttpClientConfigurator
         return services
             // Add logging http handler used by all clients.
             .AddHttpClient(
-                HttpClientName,
+                GetAuthenticatedHttpClientName<TCustomData>(),
                 (sp, client) =>
                 {
-                    var options = sp.GetRequiredService<IOptionsMonitor<PinMeToClientOptions>>();
-                    var credentials =
-                        $"{options.CurrentValue.AppId}:{options.CurrentValue.AppSecret}";
+                    var options = sp.GetRequiredService<CurrentOptionsProvider>()
+                        .GetCurrentOptions<TCustomData>();
+
+                    var credentials = $"{options.AppId}:{options.AppSecret}";
                     var b64Credentials = Convert.ToBase64String(
                         Encoding.UTF8.GetBytes(credentials)
                     );
 
-                    client.BaseAddress = options.CurrentValue.ApiBaseAddress;
+                    client.BaseAddress = options.ApiBaseAddress;
                     client.DefaultRequestHeaders.Authorization = new("Basic", b64Credentials);
                     client.Timeout = TimeSpan.FromSeconds(5);
                 }

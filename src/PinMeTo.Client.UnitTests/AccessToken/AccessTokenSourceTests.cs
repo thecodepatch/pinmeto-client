@@ -3,6 +3,7 @@ using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
 using TheCodePatch.PinMeTo.Client.AccessToken;
+using TheCodePatch.PinMeTo.Client.UnitTests.Locations;
 using Xunit.Abstractions;
 
 namespace TheCodePatch.PinMeTo.Client.UnitTests.AccessToken;
@@ -19,12 +20,12 @@ public class AccessTokenSourceTests : UnitTestBase
     [Fact]
     public async Task ConsecutiveTokenRetrievalsAreFast()
     {
-        await _accessTokenSource.GetAccessToken();
+        await _accessTokenSource.GetAccessToken<TestCustomData>();
 
         var s = Stopwatch.StartNew();
         for (var i = 0; i < 10; i++)
         {
-            await _accessTokenSource.GetAccessToken();
+            await _accessTokenSource.GetAccessToken<TestCustomData>();
         }
 
         s.ElapsedMilliseconds.ShouldBeLessThan(5);
@@ -33,7 +34,7 @@ public class AccessTokenSourceTests : UnitTestBase
     [Fact]
     public async Task TokenIsRetrievedWithExpectedValues()
     {
-        var t = await _accessTokenSource.GetAccessToken();
+        var t = await _accessTokenSource.GetAccessToken<TestCustomData>();
         t.ShouldNotBeNullOrWhiteSpace();
     }
 }

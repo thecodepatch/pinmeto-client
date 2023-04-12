@@ -49,12 +49,15 @@ public abstract class UnitTestBase : IAsyncLifetime
             .Services;
 
         // Enable custom service configuration in the test classes.
-        ConfigureServices(serviceCollection);
+        ConfigureServices(serviceCollection, conf);
 
         ServiceProvider = serviceCollection.BuildServiceProvider();
     }
 
-    protected virtual IServiceCollection ConfigureServices(IServiceCollection services)
+    protected virtual IServiceCollection ConfigureServices(
+        IServiceCollection services,
+        IConfiguration configuration
+    )
     {
         return services;
     }

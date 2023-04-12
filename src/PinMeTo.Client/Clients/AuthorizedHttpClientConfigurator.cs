@@ -21,27 +21,29 @@ internal static class AuthorizedHttpClientConfigurator
     /// <param name="services">The service collection.</param>
     /// <param name="clientName">The name of the named HTTP client.</param>
     /// <returns>The service collection with the authorized HTTP client added.</returns>
-    public static IServiceCollection AddAndConfigureAuthorizedHttpClient(
+    public static IServiceCollection AddAndConfigureAuthorizedHttpClient<TCustomData>(
         this IServiceCollection services,
-        string clientName
+        out string clientName
     )
     {
+        clientName = $"PinMeToAuthorizedHttpClient-{typeof(TCustomData).FullName}";
         services.TryAddTransient<LoggingDelegatingHttpClientHandler>();
 
         return services
-            .AddTransient<AuthorizingDelegatingHttpHandler>()
+            .AddTransient<AuthorizingDelegatingHttpHandler<TCustomData>>()
             .AddHttpClient(clientName)
             .ConfigureHttpClient(
                 (sp, client) =>
                 {
-                    var options = sp.GetRequiredService<IOptionsMonitor<PinMeToClientOptions>>();
-                    client.BaseAddress = options.CurrentValue.ApiBaseAddress;
+                    var options = sp.GetRequiredService<CurrentOptionsProvider>()
+                        .GetCurrentOptions<TCustomData>();
+                    client.BaseAddress = options.ApiBaseAddress;
                 }
             )
             .ConfigureHttpMessageHandlerBuilder(b =>
             {
                 b.AdditionalHandlers.Add(
-                    b.Services.GetRequiredService<AuthorizingDelegatingHttpHandler>()
+                    b.Services.GetRequiredService<AuthorizingDelegatingHttpHandler<TCustomData>>()
                 );
 
                 b.AdditionalHandlers.Add(
@@ -55,7 +57,7 @@ internal static class AuthorizedHttpClientConfigurator
     ///     Handler for the authorized HTTP client.
     ///     Adds the access token to the request headers.
     /// </summary>
-    private class AuthorizingDelegatingHttpHandler : DelegatingHandler
+    private class AuthorizingDelegatingHttpHandler<TCustomData> : DelegatingHandler
     {
         private readonly IAccessTokenSource _accessTokenSource;
 
@@ -69,7 +71,7 @@ internal static class AuthorizedHttpClientConfigurator
             CancellationToken cancellationToken
         )
         {
-            var accessToken = await _accessTokenSource.GetAccessToken();
+            var accessToken = await _accessTokenSource.GetAccessToken<TCustomData>();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             return await base.SendAsync(request, cancellationToken);
