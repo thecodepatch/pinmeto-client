@@ -59,6 +59,7 @@ public static class Bootstrapping
         this IServiceCollection services
     )
     {
+        var httpClientName = $"PinMeToAuthorizedHttpClient-{typeof(TCustomData).FullName}";
         return services
             .AddSingleton<ISerializer, Serializer>()
             .AddSingleton<IUrlFactory, UrlFactory>()
@@ -68,10 +69,10 @@ public static class Bootstrapping
             .AddAndConfigureAuthenticatedHttpClient()
             .AddSingleton<IAccessTokenSource, AccessTokenSource>()
             // Add the http client authorized to use resources provided by the PinMeTo API.
-            .AddAndConfigureAuthorizedHttpClient(out var authorizedHttpClientName)
+            .AddAndConfigureAuthorizedHttpClient(httpClientName)
             // Add the service providing access to the Locations resources in the API.
             .AddHttpClient<ILocationsService<TCustomData>, LocationsService<TCustomData>>(
-                authorizedHttpClientName
+                httpClientName
             )
             .Services;
     }

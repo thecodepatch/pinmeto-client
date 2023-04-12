@@ -23,15 +23,14 @@ internal static class AuthorizedHttpClientConfigurator
     /// <returns>The service collection with the authorized HTTP client added.</returns>
     public static IServiceCollection AddAndConfigureAuthorizedHttpClient(
         this IServiceCollection services,
-        out string clientName
+        string clientName
     )
     {
-        clientName = ClientName;
         services.TryAddTransient<LoggingDelegatingHttpClientHandler>();
 
         return services
             .AddTransient<AuthorizingDelegatingHttpHandler>()
-            .AddHttpClient(ClientName)
+            .AddHttpClient(clientName)
             .ConfigureHttpClient(
                 (sp, client) =>
                 {
@@ -39,25 +38,18 @@ internal static class AuthorizedHttpClientConfigurator
                     client.BaseAddress = options.CurrentValue.ApiBaseAddress;
                 }
             )
-            .ConfigureHttpMessageHandlerBuilder(
-                b =>
-                {
-                    b.AdditionalHandlers.Add(
-                        b.Services.GetRequiredService<AuthorizingDelegatingHttpHandler>()
-                    );
+            .ConfigureHttpMessageHandlerBuilder(b =>
+            {
+                b.AdditionalHandlers.Add(
+                    b.Services.GetRequiredService<AuthorizingDelegatingHttpHandler>()
+                );
 
-                    b.AdditionalHandlers.Add(
-                        b.Services.GetRequiredService<LoggingDelegatingHttpClientHandler>()
-                    );
-                }
-            )
+                b.AdditionalHandlers.Add(
+                    b.Services.GetRequiredService<LoggingDelegatingHttpClientHandler>()
+                );
+            })
             .Services;
     }
-
-    /// <summary>
-    /// The name of the named HTTP client.
-    /// </summary>
-    private const string ClientName = "AuthorizedHttpClient";
 
     /// <summary>
     ///     Handler for the authorized HTTP client.
