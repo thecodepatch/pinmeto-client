@@ -3,3 +3,5 @@
 namespace TheCodePatch.PinMeTo.Client.UnitTests.Locations;
 
 public record TestCustomData;
+
+public record InvalidInstanceTestCustomData;

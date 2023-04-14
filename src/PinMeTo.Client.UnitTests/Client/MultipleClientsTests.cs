@@ -11,12 +11,12 @@ namespace TheCodePatch.PinMeTo.Client.UnitTests.Client;
 public class MultipleClientsTests : UnitTestBase
 {
     private readonly ILocationsService<TestCustomData> _defaultLocationService;
-    private readonly ILocationsService<AnotherTestCustomData> _lastRegisteredService;
+    private readonly ILocationsService<InvalidInstanceTestCustomData> _lastRegisteredService;
 
     public MultipleClientsTests(ITestOutputHelper testOutputHelper) : base(testOutputHelper)
     {
         _defaultLocationService = GetService<TestCustomData>();
-        _lastRegisteredService = GetService<AnotherTestCustomData>();
+        _lastRegisteredService = GetService<InvalidInstanceTestCustomData>();
     }
 
     private ILocationsService<TCustomData> GetService<TCustomData>()
@@ -41,17 +41,4 @@ public class MultipleClientsTests : UnitTestBase
             () => _lastRegisteredService.List(new PageNavigation(5))
         );
     }
-
-    protected override IServiceCollection ConfigureServices(
-        IServiceCollection services,
-        IConfiguration configuration
-    )
-    {
-        return base.ConfigureServices(services, configuration)
-            .AddPinMeToClient<AnotherTestCustomData>(
-                configuration.GetSection("InvalidPinMeToClient")
-            );
-    }
-
-    private record AnotherTestCustomData;
 }

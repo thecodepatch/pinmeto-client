@@ -9,10 +9,10 @@ using TheCodePatch.PinMeTo.Client.Response;
 
 namespace TheCodePatch.PinMeTo.Client.AccessToken;
 
-internal class AccessTokenSource : IAccessTokenSource
+internal class AccessTokenSource<TCustomData> : IAccessTokenSource<TCustomData>
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    private readonly ILogger<AccessTokenSource> _logger;
+    private readonly ILogger<AccessTokenSource<TCustomData>> _logger;
     private readonly CurrentOptionsProvider _optionsProvider;
     private readonly IResponseHandler _responseHandler;
     private AccessToken? _currentToken;
@@ -21,7 +21,7 @@ internal class AccessTokenSource : IAccessTokenSource
         IHttpClientFactory httpClientFactory,
         CurrentOptionsProvider optionsProvider,
         IResponseHandler responseHandler,
-        ILogger<AccessTokenSource> logger
+        ILogger<AccessTokenSource<TCustomData>> logger
     )
     {
         _httpClientFactory = httpClientFactory;
@@ -31,7 +31,7 @@ internal class AccessTokenSource : IAccessTokenSource
     }
 
     /// <inheritdoc />
-    public async Task<string> GetAccessToken<TCustomData>()
+    public async Task<string> GetAccessToken()
     {
         if (_currentToken?.GetRemainingValiditySeconds() > 10)
         {
@@ -44,13 +44,13 @@ internal class AccessTokenSource : IAccessTokenSource
             null == _currentToken ? "not found" : "expired"
         );
 
-        await RefreshToken<TCustomData>();
-        return await GetAccessToken<TCustomData>();
+        await RefreshToken();
+        return await GetAccessToken();
     }
 
-    private async Task RefreshToken<TCustomData>()
+    private async Task RefreshToken()
     {
-        var deserialized = await RetrieveTokenFromApi<TCustomData>();
+        var deserialized = await RetrieveTokenFromApi();
 
         _logger.LogDebug(
             "New access token will be used for {ValidityDuration} seconds",
@@ -64,7 +64,7 @@ internal class AccessTokenSource : IAccessTokenSource
         };
     }
 
-    private async Task<ResponseModel> RetrieveTokenFromApi<TCustomData>()
+    private async Task<ResponseModel> RetrieveTokenFromApi()
     {
         var options = _optionsProvider.GetCurrentOptions<TCustomData>();
         var message = new Dictionary<string, string>

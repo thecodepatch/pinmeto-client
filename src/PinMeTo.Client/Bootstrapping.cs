@@ -77,7 +77,7 @@ public static class Bootstrapping
         return services
             // Add the http client authenticated to communicate with the PinMeTo API.
             .AddAndConfigureAuthenticatedHttpClient<TCustomData>()
-            .AddSingleton<IAccessTokenSource, AccessTokenSource>()
+            .AddSingleton<IAccessTokenSource<TCustomData>, AccessTokenSource<TCustomData>>()
             // Add the http client authorized to use resources provided by the PinMeTo API.
             .AddAndConfigureAuthorizedHttpClient<TCustomData>(out var httpClientName)
             // Add the service providing access to the Locations resources in the API.

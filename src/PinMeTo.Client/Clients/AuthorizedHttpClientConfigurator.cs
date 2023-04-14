@@ -59,9 +59,9 @@ internal static class AuthorizedHttpClientConfigurator
     /// </summary>
     private class AuthorizingDelegatingHttpHandler<TCustomData> : DelegatingHandler
     {
-        private readonly IAccessTokenSource _accessTokenSource;
+        private readonly IAccessTokenSource<TCustomData> _accessTokenSource;
 
-        public AuthorizingDelegatingHttpHandler(IAccessTokenSource accessTokenSource)
+        public AuthorizingDelegatingHttpHandler(IAccessTokenSource<TCustomData> accessTokenSource)
         {
             _accessTokenSource = accessTokenSource;
         }
@@ -71,7 +71,7 @@ internal static class AuthorizedHttpClientConfigurator
             CancellationToken cancellationToken
         )
         {
-            var accessToken = await _accessTokenSource.GetAccessToken<TCustomData>();
+            var accessToken = await _accessTokenSource.GetAccessToken();
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
 
             return await base.SendAsync(request, cancellationToken);
