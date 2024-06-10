@@ -7,23 +7,15 @@ using Exception = System.Exception;
 
 namespace TheCodePatch.PinMeTo.Client.Response;
 
-internal class ExceptionFactory : IExceptionFactory
+internal class ExceptionFactory(ISerializer serializer, ILogger<ExceptionFactory> logger) : IExceptionFactory
 {
-    private readonly ISerializer _serializer;
-    private readonly ILogger<ExceptionFactory> _logger;
-
-    public ExceptionFactory(ISerializer serializer, ILogger<ExceptionFactory> logger)
-    {
-        _serializer = serializer;
-        _logger = logger;
-    }
-
     public Exception CreateException(HttpStatusCode statusCode, string responseContent)
     {
         var appropriateException = statusCode switch
         {
             HttpStatusCode.NotFound => NotFound(responseContent),
             HttpStatusCode.BadRequest => BadRequest(responseContent),
+            HttpStatusCode.BadGateway => BadGateway(),
             HttpStatusCode.UnprocessableEntity => UnprocessableEntity(responseContent),
             _ => null,
         };
@@ -33,12 +25,18 @@ internal class ExceptionFactory : IExceptionFactory
             return appropriateException;
         }
 
-        return new PinMeToException("Unexpected bad request");
+        return new PinMeToException("Unexpected exception from PinMeTo");
     }
 
+    private Exception BadGateway()
+    {
+        logger.LogDebug("BadGateway returned from API");
+        return new BadGatewayException();
+    }
+    
     private Exception NotFound(string responseContent)
     {
-        _logger.LogDebug("NotFound returned from API: {ResponseContent}", responseContent);
+        logger.LogDebug("NotFound returned from API: {ResponseContent}", responseContent);
         return new NotFoundException(responseContent);
     }
 
@@ -63,10 +61,10 @@ internal class ExceptionFactory : IExceptionFactory
 
         bool TryDeserializeErrorModel([NotNullWhen(true)] out Exception? e)
         {
-            var errorModel = _serializer.Deserialize<ErrorResponse>(responseContent);
+            var errorModel = serializer.Deserialize<ErrorResponse>(responseContent);
             if (errorModel.Error == "invalid_request")
             {
-                _logger.LogError(
+                logger.LogError(
                     "Invalid Request returned from API: {ResponseContent}",
                     responseContent
                 );
@@ -82,15 +80,15 @@ internal class ExceptionFactory : IExceptionFactory
             [NotNullWhen(true)] out Exception? exception
         )
         {
-            var validationErrors = _serializer.Deserialize<
+            var validationErrors = serializer.Deserialize<
                 AtomicResponse<Dictionary<string, List<string>>>
             >(responseContent);
             // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
             if (null != validationErrors.Data)
             {
-                _logger.LogWarning(
+                logger.LogWarning(
                     "Validation errors 1: {ValidationErrors}",
-                    _serializer.Serialize(validationErrors.Data)
+                    serializer.Serialize(validationErrors.Data)
                 );
                 exception = new ValidationErrorsException(validationErrors.Data);
                 return true;
@@ -102,15 +100,15 @@ internal class ExceptionFactory : IExceptionFactory
 
         bool TryDeserializeValidationErrors([NotNullWhen(true)] out Exception? e)
         {
-            var validationErrors2 = _serializer.Deserialize<Dictionary<string, List<string>>>(
+            var validationErrors2 = serializer.Deserialize<Dictionary<string, List<string>>>(
                 responseContent
             );
             // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
             if (null != validationErrors2)
             {
-                _logger.LogWarning(
+                logger.LogWarning(
                     "Validation errors 2: {ValidationErrors}",
-                    _serializer.Serialize(validationErrors2)
+                    serializer.Serialize(validationErrors2)
                 );
                 e = new ValidationErrorsException(validationErrors2);
                 return true;

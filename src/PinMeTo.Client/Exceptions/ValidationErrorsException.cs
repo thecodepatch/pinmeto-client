@@ -13,7 +13,7 @@ public class ValidationErrorsException : Exception
     public IDictionary<string, List<string>> ValidationErrors { get; }
 
     internal ValidationErrorsException(IDictionary<string, List<string>> validationErrors)
-        : base("Validation errror(s) occurred: " + JsonSerializer.Serialize(validationErrors))
+        : base("Validation error(s) occurred: " + JsonSerializer.Serialize(validationErrors))
     {
         ValidationErrors = validationErrors;
     }
