@@ -7,8 +7,17 @@ using Exception = System.Exception;
 
 namespace TheCodePatch.PinMeTo.Client.Response;
 
-internal class ExceptionFactory(ISerializer serializer, ILogger<ExceptionFactory> logger) : IExceptionFactory
+internal class ExceptionFactory : IExceptionFactory
 {
+    private readonly ISerializer _serializer;
+    private readonly ILogger<ExceptionFactory> _logger;
+
+    public ExceptionFactory(ISerializer serializer, ILogger<ExceptionFactory> logger)
+    {
+        _serializer = serializer;
+        _logger = logger;
+    }
+
     public Exception CreateException(HttpStatusCode statusCode, string responseContent)
     {
         var appropriateException = statusCode switch
@@ -30,13 +39,13 @@ internal class ExceptionFactory(ISerializer serializer, ILogger<ExceptionFactory
 
     private Exception BadGateway()
     {
-        logger.LogDebug("BadGateway returned from API");
+        _logger.LogDebug("BadGateway returned from API");
         return new BadGatewayException();
     }
-    
+
     private Exception NotFound(string responseContent)
     {
-        logger.LogDebug("NotFound returned from API: {ResponseContent}", responseContent);
+        _logger.LogDebug("NotFound returned from API: {ResponseContent}", responseContent);
         return new NotFoundException(responseContent);
     }
 
@@ -61,10 +70,10 @@ internal class ExceptionFactory(ISerializer serializer, ILogger<ExceptionFactory
 
         bool TryDeserializeErrorModel([NotNullWhen(true)] out Exception? e)
         {
-            var errorModel = serializer.Deserialize<ErrorResponse>(responseContent);
+            var errorModel = _serializer.Deserialize<ErrorResponse>(responseContent);
             if (errorModel.Error == "invalid_request")
             {
-                logger.LogError(
+                _logger.LogError(
                     "Invalid Request returned from API: {ResponseContent}",
                     responseContent
                 );
@@ -80,15 +89,15 @@ internal class ExceptionFactory(ISerializer serializer, ILogger<ExceptionFactory
             [NotNullWhen(true)] out Exception? exception
         )
         {
-            var validationErrors = serializer.Deserialize<
+            var validationErrors = _serializer.Deserialize<
                 AtomicResponse<Dictionary<string, List<string>>>
             >(responseContent);
             // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
             if (null != validationErrors.Data)
             {
-                logger.LogWarning(
+                _logger.LogWarning(
                     "Validation errors 1: {ValidationErrors}",
-                    serializer.Serialize(validationErrors.Data)
+                    _serializer.Serialize(validationErrors.Data)
                 );
                 exception = new ValidationErrorsException(validationErrors.Data);
                 return true;
@@ -100,15 +109,15 @@ internal class ExceptionFactory(ISerializer serializer, ILogger<ExceptionFactory
 
         bool TryDeserializeValidationErrors([NotNullWhen(true)] out Exception? e)
         {
-            var validationErrors2 = serializer.Deserialize<Dictionary<string, List<string>>>(
+            var validationErrors2 = _serializer.Deserialize<Dictionary<string, List<string>>>(
                 responseContent
             );
             // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
             if (null != validationErrors2)
             {
-                logger.LogWarning(
+                _logger.LogWarning(
                     "Validation errors 2: {ValidationErrors}",
-                    serializer.Serialize(validationErrors2)
+                    _serializer.Serialize(validationErrors2)
                 );
                 e = new ValidationErrorsException(validationErrors2);
                 return true;
